@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, jsonify
 import pickle
 import os
 import sqlite3
-import requests
 
 app = Flask(__name__)
 
@@ -12,7 +11,7 @@ app = Flask(__name__)
 model = pickle.load(open(os.path.join('model', 'model.pkl'), 'rb'))
 
 # -------------------------------
-# Database Init
+# Database Setup
 # -------------------------------
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -36,7 +35,7 @@ def init_db():
 init_db()
 
 # -------------------------------
-# Behavior AI System
+# Behavior AI (simple learning)
 # -------------------------------
 user_profiles = {}
 
@@ -60,46 +59,11 @@ def calculate_behavior_risk(user_id, amount, time, location):
     if abs(location - profile["avg_location"]) > 20:
         risk += 15
 
-    # update profile
     profile["avg_amount"] = (profile["avg_amount"] + amount) / 2
     profile["avg_time"] = (profile["avg_time"] + time) / 2
     profile["avg_location"] = (profile["avg_location"] + location) / 2
 
     return risk
-
-# -------------------------------
-# 🧠 AI Explanation (OLLAMA)
-# -------------------------------
-def get_ai_explanation(amount, time, location, risk_score, result):
-    prompt = f"""
-You are a fintech fraud detection AI.
-
-Transaction:
-Amount: {amount}
-Time: {time}
-Location: {location}
-Risk Score: {risk_score}
-Result: {result}
-
-Explain in 2-3 lines why this transaction is safe or fraud.
-Be professional and short.
-"""
-
-    try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3",
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=5
-        )
-
-        return response.json().get("response", "No AI response")
-
-    except:
-        return "AI explanation not available (local AI not running)"
 
 # -------------------------------
 # Routes
@@ -118,9 +82,10 @@ def check_transaction():
         time = float(data.get("time", 0))
         location = float(data.get("location", 0))
 
-        # ML prediction
+        # ML Prediction
         prediction = model.predict([[amount, time, location]])[0]
         probability = model.predict_proba([[amount, time, location]])[0][1]
+
         ml_risk = round(probability * 100, 2)
 
         # Behavior risk
@@ -131,15 +96,10 @@ def check_transaction():
 
         result = "Fraud" if final_risk > 60 else "Safe"
 
-        # 🚨 Alert system
+        # Alert system
         alert = True if final_risk > 75 else False
 
-        # 🧠 AI explanation
-        ai_explanation = get_ai_explanation(
-            amount, time, location, final_risk, result
-        )
-
-        # Save to DB
+        # Save DB
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
 
@@ -156,7 +116,7 @@ def check_transaction():
             "risk_score": final_risk,
             "behavior_risk": behavior_risk,
             "alert": alert,
-            "ai_explanation": ai_explanation
+            "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
         })
 
     except Exception as e:
@@ -185,6 +145,33 @@ def get_history():
         }
         for r in rows
     ])
+
+# -------------------------------
+# Analytics API
+# -------------------------------
+@app.route('/analytics', methods=['GET'])
+def analytics():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*) FROM transactions")
+    total = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM transactions WHERE result='Fraud'")
+    fraud = c.fetchone()[0]
+
+    safe = total - fraud
+
+    fraud_percent = round((fraud / total) * 100, 2) if total > 0 else 0
+
+    conn.close()
+
+    return jsonify({
+        "total": total,
+        "fraud": fraud,
+        "safe": safe,
+        "fraud_percent": fraud_percent
+    })
 
 # -------------------------------
 # Run
