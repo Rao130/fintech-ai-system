@@ -1,41 +1,103 @@
+/* GLOBAL */
 body {
-    font-family: Arial;
+    font-family: 'Segoe UI', sans-serif;
     background: #0f172a;
-    color: white;
+    color: #e2e8f0;
+    margin: 0;
+    padding: 20px;
+}
+
+/* HEADINGS */
+h1 {
     text-align: center;
+    color: #38bdf8;
 }
 
-.container {
-    margin-top: 100px;
+h2 {
+    color: #94a3b8;
 }
 
-.form-box input {
-    padding: 10px;
-    margin: 5px;
-    border-radius: 5px;
+h3 {
+    margin-top: 10px;
+}
+
+/* CARD STYLE */
+.card {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+/* INPUT FIELDS */
+input {
+    padding: 12px;
+    margin: 8px 5px;
+    border-radius: 6px;
     border: none;
+    outline: none;
+    background: #334155;
+    color: white;
+    width: 200px;
 }
 
+/* BUTTON */
 button {
-    padding: 10px 20px;
-    background: #3b82f6;
+    padding: 12px 20px;
+    background: linear-gradient(45deg, #3b82f6, #06b6d4);
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
-.result-box {
-    margin-top: 20px;
-    padding: 15px;
-    font-size: 20px;
-    border-radius: 5px;
+button:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+/* RESULT */
+#result {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* HISTORY LIST */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    background: #334155;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 6px;
+}
+
+/* FRAUD / SAFE COLORS */
+.fraud {
+    color: #ef4444;
+    font-weight: bold;
 }
 
 .safe {
-    background: green;
+    color: #22c55e;
+    font-weight: bold;
 }
 
-.fraud {
-    background: red;
+/* INSIGHT BOX */
+#insight {
+    font-size: 16px;
+    padding: 10px;
+    border-left: 4px solid #3b82f6;
+}
+
+/* CHART CONTAINER */
+canvas {
+    max-width: 300px;
+    margin: auto;
+    display: block;
 }
