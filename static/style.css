@@ -1,167 +1,61 @@
 /* =========================
-   RESET
-========================= */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-}
+   CHART FIX (IMPORTANT)
+   ========================= */
 
-body {
-    background: #f5f7fb;
-    color: #111827;
-}
-
-/* =========================
-   CONTAINER
-========================= */
-.container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 24px;
-}
-
-/* =========================
-   HEADER
-========================= */
-h1 {
-    text-align: center;
-    font-size: 24px;
-    font-weight: 600;
-    color: #111827;
-    margin-bottom: 20px;
-}
-
-/* =========================
-   CARD (MINIMAL PRO STYLE)
-========================= */
-.card {
+canvas {
+    width: 100% !important;
+    max-height: 280px !important;
+    height: 280px !important;
     background: #ffffff;
-    border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-    transition: 0.2s ease;
-}
-
-.card:hover {
-    border-color: #d1d5db;
-}
-
-/* =========================
-   INPUTS
-========================= */
-input {
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 10px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
-    outline: none;
-    background: #fff;
-    color: #111827;
-    transition: 0.2s;
-}
-
-input:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
-}
-
-/* =========================
-   BUTTON (CLEAN PRO)
-========================= */
-button {
-    width: 100%;
-    padding: 10px 12px;
-    margin-top: 12px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    background: #2563eb;
-    color: white;
-    transition: 0.2s ease;
-}
-
-button:hover {
-    background: #1d4ed8;
-}
-
-/* =========================
-   ALERT
-========================= */
-.alert {
-    background: #fee2e2;
-    color: #991b1b;
     padding: 10px;
-    border-radius: 10px;
-    margin-top: 12px;
-    display: none;
-    border: 1px solid #fecaca;
-    font-weight: 500;
+    border: 1px solid #e5e7eb;
+    display: block;
+}
+
+/* Chart container better spacing */
+.card canvas {
+    margin-top: 10px;
 }
 
 /* =========================
-   STATS GRID
-========================= */
+   IMPROVED GRID BALANCE
+   ========================= */
 .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-top: 20px;
+    margin-top: 18px;
+    gap: 12px;
 }
 
 .grid .card {
-    text-align: center;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-/* =========================
-   TABLE (VERY CLEAN)
-========================= */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-}
-
-th, td {
-    padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 14px;
     font-size: 14px;
 }
 
-th {
-    font-weight: 600;
-    color: #374151;
+/* =========================
+   SECTION SPACING FIX
+   ========================= */
+.card {
+    margin-bottom: 14px;
 }
 
 /* =========================
-   CHART
-========================= */
-canvas {
-    margin-top: 15px;
-    background: white;
-    border-radius: 12px;
+   TABLE IMPROVEMENT (cleaner look)
+   ========================= */
+table {
+    font-size: 13px;
+}
+
+th, td {
     padding: 10px;
-    border: 1px solid #e5e7eb;
 }
 
 /* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 900px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+   OVERALL UI POLISH
+   ========================= */
+button {
+    font-size: 14px;
 }
 
-@media (max-width: 500px) {
-    .grid {
-        grid-template-columns: 1fr;
-    }
+input {
+    font-size: 14px;
 }
