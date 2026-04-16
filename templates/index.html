@@ -9,11 +9,14 @@
 
     <input type="number" id="amount" placeholder="Amount"><br><br>
     <input type="number" id="time" placeholder="Time"><br><br>
-    <input type="text" id="location" placeholder="Location"><br><br>
+    <input type="number" id="location" placeholder="Location"><br><br>
 
     <button onclick="checkFraud()">Check</button>
 
     <h3 id="result"></h3>
+
+    <h2>Transaction History</h2>
+    <ul id="history"></ul>
 
     <script>
         function checkFraud() {
@@ -34,9 +37,13 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById("result").innerText = data.result + " | Risk Score: " + data.risk_score + "%";
+                document.getElementById("result").innerText =
+                    data.result + " | Risk Score: " + data.risk_score + "%";
+
+                loadHistory(); // ✅ important
             });
         }
+
         function loadHistory() {
             fetch('/history')
             .then(res => res.json())
@@ -50,9 +57,10 @@
                 document.getElementById("history").innerHTML = list;
             });
         }
-        loadHistory();
+
+        // Page load pe history show kare
+        window.onload = loadHistory;
     </script>
-    <h2>Transaction History</h2>
-    <ul id="history"></ul>
+
 </body>
 </html>
