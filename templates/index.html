@@ -11,7 +11,7 @@
     <input type="number" id="amount" placeholder="Amount"><br><br>
     <input type="number" id="time" placeholder="Time"><br><br>
     <input type="number" id="location" placeholder="Location"><br><br>
-
+    <input type="text" id="user_id" placeholder="User ID">
     <button onclick="checkFraud()">Check</button>
 
     <h3 id="result"></h3>
@@ -24,7 +24,7 @@
             const amount = document.getElementById("amount").value;
             const time = document.getElementById("time").value;
             const location = document.getElementById("location").value;
-
+            const user_id = document.getElementById("user_id").value;
             fetch('/check_transaction', {
                 method: 'POST',
                 headers: {
@@ -33,7 +33,8 @@
                 body: JSON.stringify({
                     amount: amount,
                     time: time,
-                    location: location
+                    location: location,
+                    user_id: user_id
                 })
             })
             .then(res => res.json())
