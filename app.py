@@ -13,19 +13,38 @@ def home():
 
 @app.route('/check_transaction', methods=['POST'])
 def check_transaction():
-    data = request.json
-    
-    amount = data.get("amount")
-    time = data.get("time")
-    location = data.get("location")
+    try:
+        data = request.json
 
-    prediction = model.predict([[amount, time, location]])[0]
-    probability = model.predict_proba([[amount, time, location]])[0][1]
-    result = "Fraud" if prediction == 1 else "Safe"
-    risk_score = round(probability * 100, 2)
-    history.append({"amount": amount, "time": time, "location": location, "result": result, "risk_score": risk_score})
-    reason = generate_reason(amount, time, location, risk_score)
-    return jsonify({"result": result, "risk_score": risk_score, "reason": reason})
+        amount = float(data.get("amount", 0))
+        time = float(data.get("time", 0))
+        location = float(data.get("location", 0))
+
+        prediction = model.predict([[amount, time, location]])[0]
+        probability = model.predict_proba([[amount, time, location]])[0][1]
+
+        result = "Fraud" if prediction == 1 else "Safe"
+        risk_score = round(probability * 100, 2)
+
+        reason = generate_reason(amount, time, location, risk_score)
+
+        history.append({
+            "amount": amount,
+            "time": time,
+            "location": location,
+            "result": result,
+            "risk_score": risk_score
+        })
+
+        return jsonify({
+            "result": result,
+            "risk_score": risk_score,
+            "reason": reason
+        })
+
+    except Exception as e:
+        print("ERROR:", str(e))  # Render logs me dikhega
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/history', methods=['GET'])
 def get_history():
