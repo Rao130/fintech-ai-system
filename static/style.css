@@ -383,21 +383,13 @@ tbody tr:last-child td {
    CHARTS
 ========================= */
 canvas {
-    width: 100% !important;
-    max-height: 300px !important;
-    height: auto !important;
-    background: var(--bg-primary);
-    border-radius: 8px;
     display: block;
 }
 
 .chart-container {
+    position: relative;
+    width: 100%;
     margin-top: 20px;
-    padding: 20px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: var(--shadow-sm);
 }
 
 

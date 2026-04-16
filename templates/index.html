@@ -89,7 +89,9 @@
             <div class="grid">
                 <div class="card">
                     <h3>Fraud Analytics</h3>
-                    <canvas id="mainChart"></canvas>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="mainChart"></canvas>
+                    </div>
                 </div>
                 <div class="card">
                     <h3>Analytics Summary</h3>
@@ -221,96 +223,114 @@
             fetch('/analytics')
             .then(res => res.json())
             .then(data => {
-
                 document.getElementById('total').innerText = data.total;
                 document.getElementById('fraud').innerText = data.fraud;
                 document.getElementById('safe').innerText = data.safe;
-                document.getElementById('percent').innerText = data.fraud_percent;
+                document.getElementById('percent').innerText = data.fraud_percent + '%';
 
-                const canvas = document.getElementById('mainChart');
-                
-                if (!canvas) {
-                    console.log("Chart canvas not found");
-                    return;
-                }
-                const ctx = canvas.getContext('2d');
-                if (window.mainChartInstance) {
-                    window.mainChartInstance.destroy();
-                }
+                // Update analytics items list
+                const analyticsItems = document.getElementById("analyticsItems");
+                analyticsItems.innerHTML = `
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+                        <div class="flex-between">
+                            <span>Total Transactions</span>
+                            <strong class="text-primary">${data.total}</strong>
+                        </div>
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+                        <div class="flex-between">
+                            <span>Fraud Cases</span>
+                            <strong class="text-danger">${data.fraud}</strong>
+                        </div>
+                    </li>
+                    <li style="padding: 12px 0;">
+                        <div class="flex-between">
+                            <span>Safe Transactions</span>
+                            <strong class="text-success">${data.safe}</strong>
+                        </div>
+                    </li>
+                `;
 
-                window.mainChartInstance = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Total', 'Fraud', 'Safe'],
-                        datasets: [{
-                            label: 'Transactions',
-                            data: [data.total, data.fraud, data.safe],
-                            backgroundColor: [
-                                '#3b82f6',
-                                '#ef4444',
-                                '#10b981'
-                            ],
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: false }
+                // Create Chart
+                try {
+                    const canvasElement = document.getElementById('mainChart');
+                    if (!canvasElement) {
+                        console.error("Canvas element with id 'mainChart' not found");
+                        return;
+                    }
+
+                    // Destroy existing chart
+                    if (window.mainChartInstance) {
+                        window.mainChartInstance.destroy();
+                    }
+
+                    // Get 2D context
+                    const ctx = canvasElement.getContext('2d');
+                    if (!ctx) {
+                        console.error("Could not get canvas context");
+                        return;
+                    }
+
+                    // Create new chart
+                    window.mainChartInstance = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Total', 'Fraud', 'Safe'],
+                            datasets: [{
+                                label: 'Transactions',
+                                data: [data.total, data.fraud, data.safe],
+                                backgroundColor: [
+                                    'rgba(59, 130, 246, 0.8)',
+                                    'rgba(239, 68, 68, 0.8)',
+                                    'rgba(16, 185, 129, 0.8)'
+                                ],
+                                borderColor: [
+                                    '#3b82f6',
+                                    '#ef4444',
+                                    '#10b981'
+                                ],
+                                borderWidth: 2,
+                                borderRadius: 8
+                            }]
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true
+                        options: {
+                            indexAxis: 'x',
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { 
+                                    display: false 
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        color: 'var(--text-secondary)'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        color: 'var(--text-secondary)'
+                                    }
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                } catch (error) {
+                    console.error("Error creating chart:", error);
+                }
+            })
+            .catch(err => {
+                console.error("Error loading analytics:", err);
             });
         }
 
         // Load Chart
         let chart;
         function loadChart() {
-            fetch('/analytics')
-            .then(res => res.json())
-            .then(data => {
-                const ctx = document.getElementById('fraudChart');
-                
-                if (chart) {
-                    chart.destroy();
-                }
-
-                chart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Fraud', 'Safe'],
-                        datasets: [{
-                            data: [data.fraud, data.safe],
-                            backgroundColor: ['#ef4444', '#10b981'],
-                            borderColor: ['#dc2626', '#059669'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    color: 'var(--text-primary)',
-                                    font: {
-                                        size: 14,
-                                        weight: '600'
-                                    },
-                                    padding: 20
-                                }
-                            }
-                        }
-                    }
-                });
-            })
-            .catch(err => console.error(err));
+            // This function is deprecated - chart is now handled in loadAnalytics()
+            console.log("loadChart is no longer needed - using loadAnalytics instead");
         }
 
         // Show Alert Helper
