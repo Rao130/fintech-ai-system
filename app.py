@@ -20,10 +20,10 @@ def check_transaction():
     location = data.get("location")
 
     prediction = model.predict([[amount, time, location]])[0]
-
+    probability = model.predict_proba([[amount, time, location]])[0][1]
     result = "Fraud" if prediction == 1 else "Safe"
-
-    return jsonify({"result": result})
+    risk_score = round(probability * 100, 2)
+    return jsonify({"result": result, "risk_score": risk_score})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))

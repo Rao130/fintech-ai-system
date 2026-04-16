@@ -34,7 +34,7 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById("result").innerText = data.result;
+                document.getElementById("result").innerText = data.result + " | Risk Score: " + data.risk_score + "%";
             });
         }
     </script>
