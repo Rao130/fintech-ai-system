@@ -1,163 +1,158 @@
 /* =========================
-   BASE RESET
+   RESET
 ========================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Inter", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 body {
-    background: #0a0f1c;
-    color: #e5e7eb;
+    background: #f5f7fb;
+    color: #111827;
 }
 
 /* =========================
-   LAYOUT WRAPPER
+   CONTAINER
 ========================= */
 .container {
-    max-width: 1300px;
+    max-width: 1200px;
     margin: auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* =========================
-   TITLE (HEADER STYLE)
+   HEADER
 ========================= */
 h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: #38bdf8;
     text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
     margin-bottom: 20px;
 }
 
 /* =========================
-   CARD (MODERN SaaS STYLE)
+   CARD (MINIMAL PRO STYLE)
 ========================= */
 .card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-    transition: 0.25s ease;
+    transition: 0.2s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(56,189,248,0.3);
+    border-color: #d1d5db;
 }
 
 /* =========================
-   INPUT STYLE
+   INPUTS
 ========================= */
 input {
     width: 100%;
-    padding: 12px;
+    padding: 10px 12px;
     margin-top: 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.03);
-    color: #fff;
+    border: 1px solid #e5e7eb;
     outline: none;
+    background: #fff;
+    color: #111827;
     transition: 0.2s;
 }
 
 input:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 12px rgba(56,189,248,0.25);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
 }
 
 /* =========================
-   BUTTON (PRO STYLE)
+   BUTTON (CLEAN PRO)
 ========================= */
 button {
     width: 100%;
-    padding: 12px;
+    padding: 10px 12px;
     margin-top: 12px;
-    border: none;
     border-radius: 10px;
-    font-weight: 600;
+    border: none;
     cursor: pointer;
-    color: #0a0f1c;
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-    transition: 0.25s;
+    font-weight: 500;
+    background: #2563eb;
+    color: white;
+    transition: 0.2s ease;
 }
 
 button:hover {
-    transform: scale(1.03);
-    box-shadow: 0 10px 25px rgba(56,189,248,0.3);
+    background: #1d4ed8;
 }
 
 /* =========================
-   ALERT (HIGH RISK)
+   ALERT
 ========================= */
 .alert {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    padding: 12px;
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 10px;
     border-radius: 10px;
     margin-top: 12px;
-    text-align: center;
-    font-weight: bold;
     display: none;
-    box-shadow: 0 10px 25px rgba(239,68,68,0.25);
+    border: 1px solid #fecaca;
+    font-weight: 500;
 }
 
 /* =========================
-   KPI GRID (TOP STATS)
+   STATS GRID
 ========================= */
 .grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    gap: 14px;
     margin-top: 20px;
 }
 
 .grid .card {
     text-align: center;
-    font-size: 16px;
-    font-weight: 600;
-    color: #e5e7eb;
+    font-size: 15px;
+    font-weight: 500;
 }
 
 /* =========================
-   TABLE (SAAS STYLE)
+   TABLE (VERY CLEAN)
 ========================= */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
-    overflow: hidden;
-    border-radius: 12px;
 }
 
 th, td {
     padding: 12px;
     text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
 }
 
 th {
-    color: #38bdf8;
     font-weight: 600;
+    color: #374151;
 }
 
 /* =========================
-   CHART BOX
+   CHART
 ========================= */
 canvas {
     margin-top: 15px;
-    background: #ffffff;
+    background: white;
     border-radius: 12px;
     padding: 10px;
+    border: 1px solid #e5e7eb;
 }
 
 /* =========================
-   RESPONSIVE DESIGN
+   RESPONSIVE
 ========================= */
 @media (max-width: 900px) {
     .grid {
