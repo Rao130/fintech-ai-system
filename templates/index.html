@@ -37,7 +37,22 @@
                 document.getElementById("result").innerText = data.result + " | Risk Score: " + data.risk_score + "%";
             });
         }
+        function loadHistory() {
+            fetch('/history')
+            .then(res => res.json())
+            .then(data => {
+                let list = "";
+                data.forEach(item => {
+                    list += `<li>
+                        ₹${item.amount} - ${item.result} (${item.risk_score}%)
+                    </li>`;
+                });
+                document.getElementById("history").innerHTML = list;
+            });
+        }
+        loadHistory();
     </script>
-
+    <h2>Transaction History</h2>
+    <ul id="history"></ul>
 </body>
 </html>
