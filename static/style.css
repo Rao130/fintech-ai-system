@@ -216,3 +216,56 @@ button {
 input {
     font-size: 14px;
 }
+/* =========================
+   MAIN LAYOUT
+========================= */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    width: 220px;
+    background: #111827;
+    color: white;
+    padding: 20px;
+    position: fixed;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #38bdf8;
+}
+
+/* LINKS */
+.sidebar a {
+    display: block;
+    color: #d1d5db;
+    text-decoration: none;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: 0.2s;
+    font-size: 14px;
+}
+
+.sidebar a:hover {
+    background: #1f2937;
+    color: #ffffff;
+}
+
+/* =========================
+   MAIN CONTENT SHIFT
+========================= */
+.container {
+    margin-left: 240px;
+    width: 100%;
+    padding: 24px;
+}
