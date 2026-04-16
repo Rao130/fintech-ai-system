@@ -33,6 +33,10 @@
     <div id="alertBox" style="display:none; background:red; color:white; padding:10px; border-radius:8px;">
         🚨 HIGH RISK TRANSACTION DETECTED!
     </div>
+        <div class="card">
+        <h2>🧠 AI Analysis</h2>
+        <p id="aiText">Waiting...</p>
+    </div>
     <script>
         function checkFraud() {
             const amount = document.getElementById("amount").value;
@@ -53,8 +57,7 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById("result").innerText =
-                    data.result + " | Risk Score: " + data.risk_score + "%" + data.reason ? " | Reason: " + data.reason : "";
+                document.getElementById("aiText").innerText = data.ai_explanation;
 
                 loadHistory(); // ✅ important
                 loadAnalytics(); // ✅ important
