@@ -89,7 +89,7 @@
             <div class="grid">
                 <div class="card">
                     <h3>Fraud Analytics</h3>
-                    <canvas id="fraudChart"></canvas>
+                    <canvas id="mainChart"></canvas>
                 </div>
                 <div class="card">
                     <h3>Analytics Summary</h3>
@@ -227,8 +227,13 @@
                 document.getElementById('safe').innerText = data.safe;
                 document.getElementById('percent').innerText = data.fraud_percent;
 
-                const ctx = document.getElementById('mainChart');
-
+                const canvas = document.getElementById('mainChart');
+                
+                if (!canvas) {
+                    console.log("Chart canvas not found");
+                    return;
+                }
+                const ctx = canvas.getContext('2d');
                 if (window.mainChartInstance) {
                     window.mainChartInstance.destroy();
                 }
