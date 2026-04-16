@@ -4,11 +4,12 @@ import os
 
 app = Flask(__name__)
 
+# Load model safely
+model = pickle.load(open(os.path.join('model', 'model.pkl'), 'rb'))
+
 @app.route('/')
 def home():
     return render_template('index.html')
-
-model = pickle.load(open('model/model.pkl', 'rb'))
 
 @app.route('/check_transaction', methods=['POST'])
 def check_transaction():
@@ -26,4 +27,3 @@ def check_transaction():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
-
