@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Fraud Detection System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>💳 AI Fraud Detection System</h1>
+
+    <div class="form-box">
+        <input type="number" id="amount" placeholder="Transaction Amount">
+        <input type="number" id="time" placeholder="Hour (0-23)">
+        <input type="number" id="location" placeholder="Location (1-3)">
+        <button onclick="checkTransaction()">Analyze</button>
+    </div>
+
+    <div id="result" class="result-box"></div>
+</div>
+
+<script>
+function checkTransaction() {
+    let amount = document.getElementById("amount").value;
+    let time = document.getElementById("time").value;
+    let location = document.getElementById("location").value;
+
+    fetch('/check_transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            amount: parseInt(amount),
+            time: parseInt(time),
+            location: parseInt(location)
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        let resultBox = document.getElementById("result");
+
+        if (data.result === "Fraud") {
+            resultBox.innerHTML = "🚨 Fraud Detected!";
+            resultBox.className = "result-box fraud";
+        } else {
+            resultBox.innerHTML = "✅ Safe Transaction";
+            resultBox.className = "result-box safe";
+        }
+    });
+}
+resultBox.innerHTML = "Analyzing...";
+</script>
+
+</body>
+</html>
