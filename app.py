@@ -145,6 +145,34 @@ def get_history():
 
     return jsonify(history)
 
+@app.route('/analytics', methods=['GET'])
+def analytics():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    # Total transactions
+    c.execute("SELECT COUNT(*) FROM transactions")
+    total = c.fetchone()[0]
+
+    # Fraud count
+    c.execute("SELECT COUNT(*) FROM transactions WHERE result='Fraud'")
+    fraud = c.fetchone()[0]
+
+    # Safe count
+    safe = total - fraud
+
+    # Fraud %
+    fraud_percent = round((fraud / total) * 100, 2) if total > 0 else 0
+
+    conn.close()
+
+    return jsonify({
+        "total": total,
+        "fraud": fraud,
+        "safe": safe,
+        "fraud_percent": fraud_percent
+    })
+
 # -------------------------------
 # Run
 # -------------------------------

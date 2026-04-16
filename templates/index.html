@@ -18,7 +18,13 @@
 
     <h2>Transaction History</h2>
     <ul id="history"></ul>
-
+    <div class="card">
+        <h2>📊 Analytics</h2>
+        <p>Total: <span id="total">0</span></p>
+        <p>Fraud: <span id="fraud">0</span></p>
+        <p>Safe: <span id="safe">0</span></p>
+        <p>Fraud %: <span id="percent">0%</span></p>
+    </div>
     <script>
         function checkFraud() {
             const amount = document.getElementById("amount").value;
@@ -43,6 +49,7 @@
                     data.result + " | Risk Score: " + data.risk_score + "%" + data.reason ? " | Reason: " + data.reason : "";
 
                 loadHistory(); // ✅ important
+                loadAnalytics(); // ✅ important
             });
         }
 
@@ -61,7 +68,22 @@
         }
 
         // Page load pe history show kare
-        window.onload = loadHistory;
+
+        
+        function loadAnalytics() {
+            fetch('/analytics')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("total").innerText = data.total;
+                document.getElementById("fraud").innerText = data.fraud;
+                document.getElementById("safe").innerText = data.safe;
+                document.getElementById("percent").innerText = data.fraud_percent + "%";
+            });
+        }
+        window.onload = function() {
+            loadHistory();
+            loadAnalytics();
+        }
     </script>
 
 </body>
