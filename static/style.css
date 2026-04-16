@@ -1,103 +1,116 @@
-/* GLOBAL */
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: Arial, sans-serif;
     background: #0f172a;
-    color: #e2e8f0;
+    color: white;
     margin: 0;
+    padding: 0;
+}
+
+.container {
     padding: 20px;
 }
 
-/* HEADINGS */
 h1 {
     text-align: center;
     color: #38bdf8;
+    margin-bottom: 20px;
 }
 
-h2 {
-    color: #94a3b8;
+/* ---------------- CARDS ---------------- */
+.card {
+    background: #1e293b;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 
-h3 {
+/* ---------------- INPUTS ---------------- */
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: #0f172a;
+    color: white;
+}
+
+/* ---------------- BUTTON ---------------- */
+button {
+    width: 100%;
+    padding: 10px;
+    background: #38bdf8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: black;
     margin-top: 10px;
 }
 
-/* CARD STYLE */
-.card {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-}
-
-/* INPUT FIELDS */
-input {
-    padding: 12px;
-    margin: 8px 5px;
-    border-radius: 6px;
-    border: none;
-    outline: none;
-    background: #334155;
-    color: white;
-    width: 200px;
-}
-
-/* BUTTON */
-button {
-    padding: 12px 20px;
-    background: linear-gradient(45deg, #3b82f6, #06b6d4);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
 button:hover {
-    transform: scale(1.05);
-    opacity: 0.9;
+    background: #0ea5e9;
 }
 
-/* RESULT */
-#result {
+/* ---------------- ALERT ---------------- */
+.alert {
+    background: #ef4444;
+    padding: 10px;
+    margin-top: 10px;
+    display: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* ---------------- GRID STATS ---------------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.grid .card {
+    text-align: center;
     font-size: 18px;
     font-weight: bold;
 }
 
-/* HISTORY LIST */
-ul {
-    list-style: none;
-    padding: 0;
+/* ---------------- TABLE ---------------- */
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
 }
 
-li {
-    background: #334155;
+th, td {
     padding: 10px;
-    margin: 5px 0;
-    border-radius: 6px;
+    border-bottom: 1px solid #334155;
+    text-align: center;
 }
 
-/* FRAUD / SAFE COLORS */
-.fraud {
-    color: #ef4444;
-    font-weight: bold;
+th {
+    color: #38bdf8;
 }
 
-.safe {
-    color: #22c55e;
-    font-weight: bold;
-}
-
-/* INSIGHT BOX */
-#insight {
-    font-size: 16px;
-    padding: 10px;
-    border-left: 4px solid #3b82f6;
-}
-
-/* CHART CONTAINER */
+/* ---------------- CHART ---------------- */
 canvas {
-    max-width: 300px;
-    margin: auto;
-    display: block;
+    margin-top: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+/* ---------------- RESPONSIVE ---------------- */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
 }
