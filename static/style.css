@@ -51,6 +51,11 @@ body {
     padding: 32px 24px;
 }
 
+.main-content .container {
+    margin: 0;
+    padding: 32px 24px;
+}
+
 /* =========================
    HEADER & TYPOGRAPHY
 ========================= */
@@ -400,6 +405,10 @@ canvas {
    RESPONSIVE DESIGN
 ========================= */
 @media (max-width: 1024px) {
+    .main-content {
+        margin-left: 260px;
+    }
+
     .container {
         padding: 24px 16px;
     }
@@ -415,6 +424,15 @@ canvas {
 }
 
 @media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar {
+        width: 240px;
+    }
+
     .container {
         padding: 16px 12px;
     }
@@ -490,6 +508,14 @@ canvas {
 
     .stat-label {
         font-size: 11px;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
+    .sidebar-toggle {
+        display: block;
     }
 }
 
@@ -598,11 +624,190 @@ canvas {
 }
 
 /* =========================
-   TRANSITIONS & ANIMATIONS
+   SIDEBAR (PROFESSIONAL FINTECH)
 ========================= */
-* {
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: white;
+    padding: 32px 0;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    border-right: 2px solid var(--primary);
 }
+
+.sidebar h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    margin: 0 20px 32px;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #38bdf8 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #cbd5e0;
+    padding: 14px 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    margin: 4px 0;
+}
+
+.sidebar a:hover {
+    color: white;
+    background: rgba(6, 182, 212, 0.1);
+    border-left-color: var(--secondary);
+    padding-left: 24px;
+}
+
+.sidebar a.active {
+    color: white;
+    background: linear-gradient(90deg, rgba(0, 102, 204, 0.15) 0%, transparent 100%);
+    border-left-color: var(--primary);
+    padding-left: 24px;
+    font-weight: 600;
+}
+
+/* Sidebar scrollbar styling */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(6, 182, 212, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.6);
+}
+
+/* Layout adjustments for sidebar */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    margin-left: 260px;
+    flex: 1;
+    width: calc(100% - 260px);
+}
+
+/* =========================
+   SIDEBAR TOGGLE (Mobile)
+========================= */
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar-toggle:hover {
+    background: var(--bg-secondary);
+}
+
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hamburger span {
+    width: 24px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* =========================
+   RESPONSIVE SIDEBAR
+========================= */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 240px;
+        padding: 24px 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .sidebar-toggle {
+        display: block;
+    }
+
+    .sidebar a {
+        padding: 12px 16px;
+    }
+
+    .sidebar h2 {
+        margin: 0 16px 24px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 640px) {
+    .sidebar {
+        width: 100%;
+        padding: 20px 0;
+    }
+
+    .sidebar a {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .sidebar h2 {
+        margin: 0 16px 20px;
+        font-size: 16px;
+    }
+
+    .sidebar-toggle {
+        top: 12px;
+        left: 12px;
+        padding: 6px 10px;
+    }
+}
+
+/* =========================
     text-decoration: none;
     padding: 10px;
     margin-bottom: 8px;

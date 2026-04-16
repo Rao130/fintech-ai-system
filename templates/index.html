@@ -1,61 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fraud Detection System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fintech AI - Fraud Detection System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-    <h2>Transaction Checker</h2>
-
-    <input type="number" id="amount" placeholder="Amount"><br><br>
-    <input type="number" id="time" placeholder="Time"><br><br>
-    <input type="number" id="location" placeholder="Location"><br><br>
-    <input type="text" id="user_id" placeholder="User ID">
-    <button onclick="checkFraud()">Check</button>
-
-    <h3 id="result"></h3>
-
-    <h2>Transaction History</h2>
-    <ul id="history"></ul>
-    <div class="card">
-        <h2>📊 Analytics</h2>
-        <p>Total: <span id="total">0</span></p>
-        <p>Fraud: <span id="fraud">0</span></p>
-        <p>Safe: <span id="safe">0</span></p>
-        <p>Fraud %: <span id="percent">0%</span></p>
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>🔐 Fintech AI</h2>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Transactions</a>
+        <a href="#">Analytics</a>
+        <a href="#">Alerts</a>
     </div>
-        <div class="card">
-        <h2>📊 Fraud Analytics</h2>
-        <canvas id="fraudChart"></canvas>
-    </div>
-    <div id="alertBox" style="display:none; background:red; color:white; padding:10px; border-radius:8px;">
-        🚨 HIGH RISK TRANSACTION DETECTED!
-    </div>
-    <div class="container">
-        <div class="layout">
-    
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-                <h2>Fintech AI</h2>
 
-                <a href="#">Dashboard</a>
-                <a href="#">Transactions</a>
-                <a href="#">Analytics</a>
-                <a href="#">Alerts</a>
+    <!-- SIDEBAR TOGGLE (Mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="container">
+            <!-- HEADER SECTION -->
+            <div class="card elevated">
+                <h1>🏦 Fraud Detection System</h1>
+                <p style="text-align: center; color: var(--text-tertiary);">Advanced AI-powered transaction analysis</p>
             </div>
 
-            <!-- MAIN CONTENT -->
-        <div class="container">
+            <!-- TRANSACTION CHECKER SECTION -->
+            <div class="card">
+                <h2>Check Transaction</h2>
+                <form id="transactionForm">
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" id="amount" placeholder="Enter transaction amount" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time">Time</label>
+                        <input type="number" id="time" placeholder="Enter time" min="0" max="24" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location Code</label>
+                        <input type="number" id="location" placeholder="Enter location code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_id">User ID</label>
+                        <input type="text" id="user_id" placeholder="Enter user ID" required>
+                    </div>
+                    <button type="button" onclick="checkFraud()">Check Transaction</button>
+                </form>
+
+                <div id="alertBox" class="alert alert-error" style="margin-top: 16px;">
+                    🚨 <strong>HIGH RISK TRANSACTION DETECTED!</strong>
+                </div>
+
+                <div id="result" class="mt-2"></div>
+            </div>
+
+            <!-- STATS GRID -->
+            <div class="grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Transactions</div>
+                    <div class="stat-value" id="total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Fraud Detected</div>
+                    <div class="stat-value text-danger" id="fraud">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Safe Transactions</div>
+                    <div class="stat-value text-success" id="safe">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Fraud %</div>
+                    <div class="stat-value text-warning" id="percent">0%</div>
+                </div>
+            </div>
+
+            <!-- CHARTS SECTION -->
+            <div class="grid">
+                <div class="card">
+                    <h3>Fraud Analytics</h3>
+                    <canvas id="fraudChart"></canvas>
+                </div>
+                <div class="card">
+                    <h3>Analytics Summary</h3>
+                    <ul id="analyticsItems" style="list-style: none; padding: 0;">
+                    </ul>
+                </div>
+            </div>
+
+            <!-- TRANSACTION HISTORY SECTION -->
+            <div class="card">
+                <h2>Transaction History</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Risk Score</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-tertiary);">No transactions yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // Sidebar toggle for mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when a link is clicked
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+            });
+        });
+
+        // Highlight active nav item
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+                e.target.classList.add('active');
+            });
+        });
+
+        // Check Fraud Function
         function checkFraud() {
             const amount = document.getElementById("amount").value;
             const time = document.getElementById("time").value;
             const location = document.getElementById("location").value;
             const user_id = document.getElementById("user_id").value;
+
+            if (!amount || !time || !location || !user_id) {
+                showAlert('Please fill all fields', 'error');
+                return;
+            }
+
             fetch('/check_transaction', {
                 method: 'POST',
                 headers: {
@@ -70,36 +172,51 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById("aiText").innerText = data.ai_explanation;
-
-                loadHistory(); // ✅ important
-                loadAnalytics(); // ✅ important
-                loadChart(); // ✅ important
+                if (data.alert) {
+                    document.getElementById("alertBox").classList.add('show');
+                    showAlert('High risk transaction detected!', 'error');
+                } else {
+                    document.getElementById("alertBox").classList.remove('show');
+                    showAlert('Transaction appears safe!', 'success');
+                }
+                loadHistory();
+                loadAnalytics();
+                loadChart();
+            })
+            .catch(err => {
+                showAlert('Error checking transaction', 'error');
+                console.error(err);
             });
-            if(data.alert){
-                document.getElementById("alertBox").style.display = "block";
-            } else {
-                document.getElementById("alertBox").style.display = "none";
-            }
         }
 
+        // Load History
         function loadHistory() {
             fetch('/history')
             .then(res => res.json())
             .then(data => {
-                let list = "";
-                data.forEach(item => {
-                    list += `<li>
-                        ₹${item.amount} - ${item.result} (${item.risk_score}%)
-                    </li>`;
-                });
-                document.getElementById("history").innerHTML = list;
-            });
+                const tbody = document.getElementById("historyBody");
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-tertiary);">No transactions yet</td></tr>';
+                    return;
+                }
+                
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td><strong>₹${item.amount.toFixed(2)}</strong></td>
+                        <td>
+                            <span class="badge ${item.result === 'Fraud' ? 'badge-danger' : 'badge-success'}">
+                                ${item.result}
+                            </span>
+                        </td>
+                        <td>${item.risk_score}%</td>
+                        <td>${new Date().toLocaleString()}</td>
+                    </tr>
+                `).join('');
+            })
+            .catch(err => console.error(err));
         }
 
-        // Page load pe history show kare
-
-        
+        // Load Analytics
         function loadAnalytics() {
             fetch('/analytics')
             .then(res => res.json())
@@ -108,23 +225,42 @@
                 document.getElementById("fraud").innerText = data.fraud;
                 document.getElementById("safe").innerText = data.safe;
                 document.getElementById("percent").innerText = data.fraud_percent + "%";
-            });
-        }
-        window.onload = function() {
-            loadHistory();
-            loadAnalytics();
-            loadChart();
-        }
-        let chart;
 
+                // Update analytics items
+                const analyticsItems = document.getElementById("analyticsItems");
+                analyticsItems.innerHTML = `
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+                        <div class="flex-between">
+                            <span>Total Transactions</span>
+                            <strong class="text-primary">${data.total}</strong>
+                        </div>
+                    </li>
+                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
+                        <div class="flex-between">
+                            <span>Fraud Cases</span>
+                            <strong class="text-danger">${data.fraud}</strong>
+                        </div>
+                    </li>
+                    <li style="padding: 12px 0;">
+                        <div class="flex-between">
+                            <span>Safe Transactions</span>
+                            <strong class="text-success">${data.safe}</strong>
+                        </div>
+                    </li>
+                `;
+            })
+            .catch(err => console.error(err));
+        }
+
+        // Load Chart
+        let chart;
         function loadChart() {
             fetch('/analytics')
             .then(res => res.json())
             .then(data => {
-
                 const ctx = document.getElementById('fraudChart');
-
-                if(chart) {
+                
+                if (chart) {
                     chart.destroy();
                 }
 
@@ -134,21 +270,55 @@
                         labels: ['Fraud', 'Safe'],
                         datasets: [{
                             data: [data.fraud, data.safe],
-                            backgroundColor: ['#ef4444', '#22c55e']
+                            backgroundColor: ['#ef4444', '#10b981'],
+                            borderColor: ['#dc2626', '#059669'],
+                            borderWidth: 2
                         }]
                     },
                     options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
                         plugins: {
                             legend: {
+                                position: 'bottom',
                                 labels: {
-                                    color: 'white'
+                                    color: 'var(--text-primary)',
+                                    font: {
+                                        size: 14,
+                                        weight: '600'
+                                    },
+                                    padding: 20
                                 }
                             }
                         }
                     }
                 });
-            });
+            })
+            .catch(err => console.error(err));
         }
+
+        // Show Alert Helper
+        function showAlert(message, type = 'info') {
+            const alertBox = document.createElement('div');
+            alertBox.className = `alert alert-${type} show`;
+            alertBox.style.marginTop = '16px';
+            alertBox.textContent = message;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+            resultDiv.appendChild(alertBox);
+
+            setTimeout(() => {
+                alertBox.remove();
+            }, 4000);
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            loadHistory();
+            loadAnalytics();
+            loadChart();
+        };
     </script>
 
 </body>
