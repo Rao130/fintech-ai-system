@@ -114,10 +114,16 @@ def check_transaction():
         conn.commit()
         conn.close()
 
+        is_alert = False
+
+        if final_risk > 75:
+            is_alert = True
+
         return jsonify({
             "result": result,
             "risk_score": final_risk,
-            "behavior_risk": behavior_risk
+            "behavior_risk": behavior_risk,
+            "is_alert": is_alert
         })
 
     except Exception as e:
