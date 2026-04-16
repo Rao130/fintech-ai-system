@@ -1,54 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AI Fraud Detection System</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Fraud Detection System</title>
 </head>
 <body>
 
-<div class="container">
-    <h1>💳 AI Fraud Detection System</h1>
+    <h2>Transaction Checker</h2>
 
-    <div class="form-box">
-        <input type="number" id="amount" placeholder="Transaction Amount">
-        <input type="number" id="time" placeholder="Hour (0-23)">
-        <input type="number" id="location" placeholder="Location (1-3)">
-        <button onclick="checkTransaction()">Analyze</button>
-    </div>
+    <input type="number" id="amount" placeholder="Amount"><br><br>
+    <input type="number" id="time" placeholder="Time"><br><br>
+    <input type="text" id="location" placeholder="Location"><br><br>
 
-    <div id="result" class="result-box"></div>
-</div>
+    <button onclick="checkFraud()">Check</button>
 
-<script>
-function checkTransaction() {
-    let amount = document.getElementById("amount").value;
-    let time = document.getElementById("time").value;
-    let location = document.getElementById("location").value;
+    <h3 id="result"></h3>
 
-    fetch('/check_transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            amount: parseInt(amount),
-            time: parseInt(time),
-            location: parseInt(location)
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        let resultBox = document.getElementById("result");
+    <script>
+        function checkFraud() {
+            const amount = document.getElementById("amount").value;
+            const time = document.getElementById("time").value;
+            const location = document.getElementById("location").value;
 
-        if (data.result === "Fraud") {
-            resultBox.innerHTML = "🚨 Fraud Detected!";
-            resultBox.className = "result-box fraud";
-        } else {
-            resultBox.innerHTML = "✅ Safe Transaction";
-            resultBox.className = "result-box safe";
+            fetch('/check_transaction', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    time: time,
+                    location: location
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("result").innerText = data.result;
+            });
         }
-    });
-}
-resultBox.innerHTML = "Analyzing...";
-</script>
+    </script>
 
 </body>
 </html>
