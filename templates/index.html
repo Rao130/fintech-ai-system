@@ -251,75 +251,36 @@
                     </li>
                 `;
 
-                // Create Chart
-                try {
-                    const canvasElement = document.getElementById('mainChart');
-                    if (!canvasElement) {
-                        console.error("Canvas element with id 'mainChart' not found");
-                        return;
-                    }
+                const canvas = document.getElementById('mainChart');
 
-                    // Destroy existing chart
-                    if (window.mainChartInstance) {
-                        window.mainChartInstance.destroy();
-                    }
-
-                    // Get 2D context
-                    const ctx = canvasElement.getContext('2d');
-                    if (!ctx) {
-                        console.error("Could not get canvas context");
-                        return;
-                    }
-
-                    // Create new chart
-                    window.mainChartInstance = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: ['Total', 'Fraud', 'Safe'],
-                            datasets: [{
-                                label: 'Transactions',
-                                data: [data.total, data.fraud, data.safe],
-                                backgroundColor: [
-                                    'rgba(59, 130, 246, 0.8)',
-                                    'rgba(239, 68, 68, 0.8)',
-                                    'rgba(16, 185, 129, 0.8)'
-                                ],
-                                borderColor: [
-                                    '#3b82f6',
-                                    '#ef4444',
-                                    '#10b981'
-                                ],
-                                borderWidth: 2,
-                                borderRadius: 8
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'x',
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            plugins: {
-                                legend: { 
-                                    display: false 
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        color: 'var(--text-secondary)'
-                                    }
-                                },
-                                x: {
-                                    ticks: {
-                                        color: 'var(--text-secondary)'
-                                    }
-                                }
-                            }
-                        }
-                    });
-                } catch (error) {
-                    console.error("Error creating chart:", error);
+                if (!canvas) {
+                    console.log("Chart canvas not found");
+                    return;
                 }
+
+                const ctx = canvas.getContext('2d');
+
+                if (window.mainChartInstance) {
+                    window.mainChartInstance.destroy();
+                }
+
+                window.mainChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total', 'Fraud', 'Safe'],
+                        datasets: [{
+                            label: 'Transactions',
+                            data: [data.total, data.fraud, data.safe],
+                            backgroundColor: ['#3b82f6', '#ef4444', '#10b981']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
             })
             .catch(err => {
                 console.error("Error loading analytics:", err);
