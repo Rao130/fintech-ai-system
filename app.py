@@ -1,47 +1,47 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
 import os
-import requests
+import sqlite3
 
 app = Flask(__name__)
 
-# Load model
+# -------------------------------
+# Load ML Model
+# -------------------------------
 model = pickle.load(open(os.path.join('model', 'model.pkl'), 'rb'))
 
-# Store history & user profiles
-history = []
+# -------------------------------
+# Initialize Database
+# -------------------------------
+def init_db():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            amount REAL,
+            time REAL,
+            location REAL,
+            result TEXT,
+            risk_score REAL
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# -------------------------------
+# Behavior Tracking (Simple AI)
+# -------------------------------
 user_profiles = {}
 
-# -------------------------------
-# 🧠 Rule-based Reason
-# -------------------------------
-def generate_reason(amount, time, location, risk_score):
-    reasons = []
-
-    if amount > 5000:
-        reasons.append("High transaction amount")
-
-    if time < 6 or time > 22:
-        reasons.append("Unusual transaction time")
-
-    if location > 50:
-        reasons.append("Suspicious location pattern")
-
-    if risk_score > 80:
-        reasons.append("Very high fraud probability")
-
-    if not reasons:
-        return "Transaction looks normal."
-
-    return ", ".join(reasons)
-
-# -------------------------------
-# ⚡ Behavior AI
-# -------------------------------
 def calculate_behavior_risk(user_id, amount, time, location):
     profile = user_profiles.get(user_id)
 
-    # New user
     if not profile:
         user_profiles[user_id] = {
             "avg_amount": amount,
@@ -51,7 +51,6 @@ def calculate_behavior_risk(user_id, amount, time, location):
         }
         return 0
 
-    # Deviation
     amount_diff = abs(amount - profile["avg_amount"])
     time_diff = abs(time - profile["avg_time"])
     location_diff = abs(location - profile["avg_location"])
@@ -65,7 +64,7 @@ def calculate_behavior_risk(user_id, amount, time, location):
     if location_diff > 20:
         risk += 15
 
-    # Update profile (learning)
+    # update profile
     profile["count"] += 1
     profile["avg_amount"] = (profile["avg_amount"] + amount) / 2
     profile["avg_time"] = (profile["avg_time"] + time) / 2
@@ -74,38 +73,7 @@ def calculate_behavior_risk(user_id, amount, time, location):
     return risk
 
 # -------------------------------
-# 🤖 AI Explanation (Ollama)
-# -------------------------------
-def get_ai_explanation(amount, time, location, risk_score):
-    prompt = f"""
-    Analyze this financial transaction:
-
-    Amount: {amount}
-    Time: {time}
-    Location: {location}
-    Risk Score: {risk_score}%
-
-    Explain if this transaction is suspicious or safe.
-    """
-
-    try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3",
-                "prompt": prompt,
-                "stream": False
-            },
-            timeout=5
-        )
-
-        return response.json().get("response", "No AI response.")
-
-    except:
-        return "AI explanation not available (Ollama not running)."
-
-# -------------------------------
-# 🌐 Routes
+# Routes
 # -------------------------------
 @app.route('/')
 def home():
@@ -116,17 +84,17 @@ def check_transaction():
     try:
         data = request.json
 
+        user_id = data.get("user_id", "guest")
         amount = float(data.get("amount", 0))
         time = float(data.get("time", 0))
         location = float(data.get("location", 0))
-        user_id = data.get("user_id", "default_user")
 
-        # ML prediction
+        # ML Prediction
         prediction = model.predict([[amount, time, location]])[0]
         probability = model.predict_proba([[amount, time, location]])[0][1]
         ml_risk = round(probability * 100, 2)
 
-        # Behavior AI
+        # Behavior Risk
         behavior_risk = calculate_behavior_risk(user_id, amount, time, location)
 
         # Final Risk
@@ -134,24 +102,22 @@ def check_transaction():
 
         result = "Fraud" if final_risk > 60 else "Safe"
 
-        # Reason + AI
-        reason = generate_reason(amount, time, location, final_risk)
-        ai_explanation = get_ai_explanation(amount, time, location, final_risk)
+        # Save to DB
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
 
-        # Save history
-        history.append({
-            "user_id": user_id,
-            "amount": amount,
-            "result": result,
-            "risk_score": final_risk
-        })
+        c.execute('''
+            INSERT INTO transactions (user_id, amount, time, location, result, risk_score)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, amount, time, location, result, final_risk))
+
+        conn.commit()
+        conn.close()
 
         return jsonify({
             "result": result,
             "risk_score": final_risk,
-            "behavior_risk": behavior_risk,
-            "reason": reason,
-            "ai_explanation": ai_explanation
+            "behavior_risk": behavior_risk
         })
 
     except Exception as e:
@@ -160,10 +126,27 @@ def check_transaction():
 
 @app.route('/history', methods=['GET'])
 def get_history():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    c.execute("SELECT user_id, amount, result, risk_score FROM transactions")
+    rows = c.fetchall()
+
+    conn.close()
+
+    history = []
+    for row in rows:
+        history.append({
+            "user_id": row[0],
+            "amount": row[1],
+            "result": row[2],
+            "risk_score": row[3]
+        })
+
     return jsonify(history)
 
 # -------------------------------
-# 🚀 Run
+# Run
 # -------------------------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
