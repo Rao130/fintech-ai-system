@@ -221,35 +221,46 @@
             fetch('/analytics')
             .then(res => res.json())
             .then(data => {
-                document.getElementById("total").innerText = data.total;
-                document.getElementById("fraud").innerText = data.fraud;
-                document.getElementById("safe").innerText = data.safe;
-                document.getElementById("percent").innerText = data.fraud_percent + "%";
 
-                // Update analytics items
-                const analyticsItems = document.getElementById("analyticsItems");
-                analyticsItems.innerHTML = `
-                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                        <div class="flex-between">
-                            <span>Total Transactions</span>
-                            <strong class="text-primary">${data.total}</strong>
-                        </div>
-                    </li>
-                    <li style="padding: 12px 0; border-bottom: 1px solid var(--border);">
-                        <div class="flex-between">
-                            <span>Fraud Cases</span>
-                            <strong class="text-danger">${data.fraud}</strong>
-                        </div>
-                    </li>
-                    <li style="padding: 12px 0;">
-                        <div class="flex-between">
-                            <span>Safe Transactions</span>
-                            <strong class="text-success">${data.safe}</strong>
-                        </div>
-                    </li>
-                `;
-            })
-            .catch(err => console.error(err));
+                document.getElementById('total').innerText = data.total;
+                document.getElementById('fraud').innerText = data.fraud;
+                document.getElementById('safe').innerText = data.safe;
+                document.getElementById('percent').innerText = data.fraud_percent;
+
+                const ctx = document.getElementById('mainChart');
+
+                if (window.mainChartInstance) {
+                    window.mainChartInstance.destroy();
+                }
+
+                window.mainChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Total', 'Fraud', 'Safe'],
+                        datasets: [{
+                            label: 'Transactions',
+                            data: [data.total, data.fraud, data.safe],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#ef4444',
+                                '#10b981'
+                            ],
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
         }
 
         // Load Chart
