@@ -1,5 +1,5 @@
 /* =========================
-   GLOBAL RESET
+   BASE RESET
 ========================= */
 * {
     margin: 0;
@@ -9,51 +9,51 @@
 }
 
 body {
-    background: #0b1220;
+    background: #0a0f1c;
     color: #e5e7eb;
+}
+
+/* =========================
+   LAYOUT WRAPPER
+========================= */
+.container {
+    max-width: 1300px;
+    margin: auto;
     padding: 20px;
 }
 
 /* =========================
-   MAIN LAYOUT
-========================= */
-.container {
-    max-width: 1200px;
-    margin: auto;
-}
-
-/* =========================
-   TITLE
+   TITLE (HEADER STYLE)
 ========================= */
 h1 {
-    text-align: center;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     color: #38bdf8;
-    margin-bottom: 25px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 /* =========================
-   GLASS CARD STYLE
+   CARD (MODERN SaaS STYLE)
 ========================= */
 .card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 18px;
-    margin-bottom: 18px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    transition: 0.3s;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    transition: 0.25s ease;
 }
 
 .card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    border-color: rgba(56,189,248,0.3);
 }
 
 /* =========================
-   INPUTS
+   INPUT STYLE
 ========================= */
 input {
     width: 100%;
@@ -61,54 +61,54 @@ input {
     margin-top: 10px;
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.05);
-    color: white;
+    background: rgba(255,255,255,0.03);
+    color: #fff;
     outline: none;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 input:focus {
     border-color: #38bdf8;
-    box-shadow: 0 0 10px rgba(56,189,248,0.3);
+    box-shadow: 0 0 12px rgba(56,189,248,0.25);
 }
 
 /* =========================
-   BUTTON
+   BUTTON (PRO STYLE)
 ========================= */
 button {
     width: 100%;
     padding: 12px;
     margin-top: 12px;
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
     border: none;
     border-radius: 10px;
-    font-weight: bold;
-    color: #0b1220;
+    font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
+    color: #0a0f1c;
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    transition: 0.25s;
 }
 
 button:hover {
-    transform: scale(1.02);
-    box-shadow: 0 10px 20px rgba(56,189,248,0.3);
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px rgba(56,189,248,0.3);
 }
 
 /* =========================
-   ALERT BOX
+   ALERT (HIGH RISK)
 ========================= */
 .alert {
     background: linear-gradient(135deg, #ef4444, #dc2626);
     padding: 12px;
-    margin-top: 12px;
     border-radius: 10px;
+    margin-top: 12px;
+    text-align: center;
     font-weight: bold;
     display: none;
-    text-align: center;
-    box-shadow: 0 10px 20px rgba(239,68,68,0.3);
+    box-shadow: 0 10px 25px rgba(239,68,68,0.25);
 }
 
 /* =========================
-   DASHBOARD GRID
+   KPI GRID (TOP STATS)
 ========================= */
 .grid {
     display: grid;
@@ -119,12 +119,13 @@ button:hover {
 
 .grid .card {
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
+    color: #e5e7eb;
 }
 
 /* =========================
-   TABLE
+   TABLE (SAAS STYLE)
 ========================= */
 table {
     width: 100%;
@@ -146,17 +147,17 @@ th {
 }
 
 /* =========================
-   CHART CARD
+   CHART BOX
 ========================= */
 canvas {
     margin-top: 15px;
-    background: white;
+    background: #ffffff;
     border-radius: 12px;
     padding: 10px;
 }
 
 /* =========================
-   RESPONSIVE
+   RESPONSIVE DESIGN
 ========================= */
 @media (max-width: 900px) {
     .grid {
