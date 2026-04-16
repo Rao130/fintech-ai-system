@@ -39,7 +39,7 @@
             .then(res => res.json())
             .then(data => {
                 document.getElementById("result").innerText =
-                    data.result + " | Risk Score: " + data.risk_score + "%" + data.reason;
+                    data.result + " | Risk Score: " + data.risk_score + "%" + data.reason ? " | Reason: " + data.reason : "";
 
                 loadHistory(); // ✅ important
             });
