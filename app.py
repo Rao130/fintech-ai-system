@@ -240,6 +240,54 @@ def filter_transactions():
         })
 
     return {"data": result}
+
+@app.route('/trend_data')
+def trend_data():
+    import sqlite3
+
+    conn = sqlite3.connect("transactions.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT DATE(rowid), COUNT(*) 
+        FROM transactions 
+        WHERE status='Fraud'
+        GROUP BY DATE(rowid)
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    dates = []
+    counts = []
+
+    for r in rows:
+        dates.append(str(r[0]))
+        counts.append(r[1])
+
+    return {"dates": dates, "counts": counts}
+
+@app.route('/export')
+def export_data():
+    import sqlite3
+    import csv
+    from flask import Response
+
+    conn = sqlite3.connect("transactions.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT name, amount, location, status, risk_score FROM transactions")
+    rows = cursor.fetchall()
+    conn.close()
+
+    def generate():
+        yield "Name,Amount,Location,Status,Risk\n"
+        for r in rows:
+            yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]}\n"
+
+    return Response(generate(), mimetype="text/csv",
+                    headers={"Content-Disposition": "attachment;filename=transactions.csv"})
+
 # -------------------------------
 # Run
 # -------------------------------

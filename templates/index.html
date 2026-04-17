@@ -122,7 +122,12 @@
             </div>
 
             <div class="card">
-                <h3>📂 Transaction Filters</h3>
+                <h3>� Fraud Trend</h3>
+                <canvas id="trendGraph"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>�📂 Transaction Filters</h3>
                 <input type="text" id="searchInput" placeholder="Search user...">
                 <select id="filterStatus">
                     <option value="">All</option>
@@ -163,6 +168,7 @@
                         </tbody>
                     </table>
                 </div>
+                <button onclick="exportData()">📤 Export CSV</button>
             </div>
         </div>
     </div>
@@ -453,11 +459,42 @@
             document.getElementById('filteredData').innerHTML = html;
         }
 
+        // Load Trend Graph
+        async function loadTrendGraph() {
+            const res = await fetch('/trend_data');
+            const data = await res.json();
+
+            const ctx = document.getElementById('trendGraph').getContext('2d');
+
+            if (window.trendGraphInstance) {
+                window.trendGraphInstance.destroy();
+            }
+
+            window.trendGraphInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.dates,
+                    datasets: [{
+                        label: 'Fraud Trend',
+                        data: data.counts,
+                        borderColor: '#ff3b3b',
+                        fill: false
+                    }]
+                }
+            });
+        }
+
+        // Export Data
+        function exportData() {
+            window.location.href = '/export';
+        }
+
         // Initialize on page load
         window.onload = function() {
             loadHistory();
             loadAnalytics();
             loadTrendChart();
+            loadTrendGraph();
             
             // Add event listeners for search and filter
             document.getElementById('searchUser').addEventListener('input', loadHistory);
