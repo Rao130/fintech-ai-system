@@ -186,7 +186,7 @@ def get_history():
             {
                 "user_id": r[0],
                 "amount": r[1],
-                "result": r[2],
+                "status": r[2],
                 "risk_score": r[3],
                 "credit_score": max(300, 900 - int(r[3]))
             }
@@ -310,18 +310,32 @@ def trend_data():
         conn = sqlite3.connect('transactions.db')
         cursor = conn.cursor()
 
-        # Get fraud transactions count
+        # Get total fraud and safe transactions
         cursor.execute("""
-            SELECT COUNT(*) 
+            SELECT status, COUNT(*) 
             FROM transactions 
-            WHERE status='Fraud'
+            GROUP BY status
         """)
 
         rows = cursor.fetchall()
         conn.close()
 
-        dates = ["Fraud Trend"]
-        counts = [rows[0][0] if rows and rows[0][0] else 0]
+        dates = []
+        counts = []
+        
+        fraud_count = 0
+        safe_count = 0
+        
+        for row in rows:
+            if row[0] == 'Fraud':
+                fraud_count = row[1]
+            elif row[0] == 'Safe':
+                safe_count = row[1]
+            elif row[0] == 'Suspicious':
+                fraud_count += row[1]  # Count suspicious as fraud for trend
+        
+        dates = ['Fraud', 'Safe']
+        counts = [fraud_count, safe_count]
 
         return jsonify({"dates": dates, "counts": counts})
     except Exception as e:
