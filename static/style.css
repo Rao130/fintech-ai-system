@@ -889,3 +889,12 @@ select {
     color: #dc2626;
     font-weight: 600;
 }
+#insights {
+    margin-top: 10px;
+    padding-left: 18px;
+}
+
+#insights li {
+    margin-bottom: 6px;
+    font-size: 14px;
+}

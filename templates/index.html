@@ -100,7 +100,10 @@
                     </ul>
                 </div>
             </div>
-            
+            <div class="card">
+                <h3>🧠 AI Insights</h3>
+                <ul id="insights"></ul>
+            </div>
             <div class="card">
                 <h3>🔍 Search & Filter</h3>
                 <input type="text" id="searchUser" placeholder="Search by User ID">
@@ -316,6 +319,14 @@
                 console.error("Error loading analytics:", err);
             });
         }
+        const insights = generateInsights(data);
+
+        let html = "";
+        insights.forEach(i => {
+            html += `<li>${i}</li>`;
+        });
+
+        document.getElementById('insights').innerHTML = html;
 
         // Load Chart
         let chart;
@@ -373,6 +384,29 @@
                 });
             });
         }
+
+        function generateInsights(data) {
+
+            let insights = [];
+
+            if (data.fraud_percent > 50) {
+                insights.push("⚠️ High fraud rate detected");
+            } else {
+                insights.push("✅ System operating normally");
+            }
+
+            if (data.fraud > data.safe) {
+                insights.push("🚨 Fraud transactions are dominating");
+            }
+
+            if (data.total < 5) {
+                insights.push("📊 Not enough data for strong analysis");
+            }
+
+            return insights;
+        }
+
+    
 
         // Initialize on page load
         window.onload = function() {
