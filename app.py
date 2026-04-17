@@ -76,45 +76,57 @@ last_alert = None
 
 @app.route('/check_transaction', methods=['POST'])
 def check_transaction():
-    global last_alert
-    data = request.json
+    try:
+        data = request.json
 
-    name = data['name']
-    amount = float(data['amount'])
-    location = data['location']
+        user_id = data.get("user_id", "guest")
+        amount = float(data.get("amount", 0))
+        time = float(data.get("time", 0))
+        location = float(data.get("location", 0))
 
-    risk_score = 0
+        # ML Prediction
+        prediction = model.predict([[amount, time, location]])[0]
+        probability = model.predict_proba([[amount, time, location]])[0][1]
 
-    if amount > 10000:
-        risk_score += 50
-    if location.lower() != "india":
-        risk_score += 30
+        ml_risk = round(probability * 100, 2)
 
-    status = "Fraud" if risk_score > 50 else "Safe"
+        # Behavior risk
+        behavior_risk = calculate_behavior_risk(user_id, amount, time, location)
 
-    # ALERT STORE
-    if status == "Fraud":
-        last_alert = {
-            "name": name,
-            "amount": amount,
-            "location": location,
-            "risk": risk_score
-        }
+        # Final risk
+        final_risk = min(ml_risk + behavior_risk, 100)
 
-    # DB SAVE (assumed already)
-    import sqlite3
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
+        result = "Fraud" if final_risk > 60 else "Safe"
 
-    cursor.execute("""
-        INSERT INTO transactions (name, amount, location, status, risk_score)
-        VALUES (?, ?, ?, ?, ?)
-    """, (name, amount, location, status, risk_score))
+        # Alert system
+        alert = True if final_risk > 75 else False
 
-    conn.commit()
-    conn.close()
+        # Save DB
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
 
-    return {"status": status, "risk_score": risk_score}
+        c.execute('''
+            INSERT INTO transactions (user_id, amount, time, location, result, risk_score)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user_id, amount, time, location, result, final_risk))
+
+        conn.commit()
+        conn.close()
+
+        credit_score = max(300, 900 - int(final_risk))
+
+        return jsonify({
+            "result": result,
+            "risk_score": final_risk,
+            "behavior_risk": behavior_risk,
+            "alert": alert,
+            "credit_score": credit_score,
+            "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
+        })
+
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 # -------------------------------
 # History API
 # -------------------------------
