@@ -122,10 +122,10 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>User ID</th>
                                 <th>Amount</th>
                                 <th>Status</th>
                                 <th>Risk Score</th>
-                                <th>Timestamp</th>
                                 <th>Credit Score</th>
                             </tr>
                         </thead>
@@ -195,11 +195,12 @@
             .then(data => {
                 if (data.alert) {
                     document.getElementById("alertBox").classList.add('show');
-                    showAlert('High risk transaction detected!', 'error');
+                    showAlert('High risk transaction detected! Credit Score: ' + data.credit_score, 'error');
                 } else {
                     document.getElementById("alertBox").classList.remove('show');
-                    showAlert('Transaction appears safe!', 'success');
+                    showAlert('Transaction appears safe! Credit Score: ' + data.credit_score, 'success');
                 }
+                document.getElementById('credit').innerText = '💳 Your Credit Score: ' + data.credit_score;
                 loadHistory();
                 loadAnalytics();
                 loadChart();
