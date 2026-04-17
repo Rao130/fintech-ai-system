@@ -898,3 +898,26 @@ select {
     margin-bottom: 6px;
     font-size: 14px;
 }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #111;
+    color: #fff;
+}
+
+tr {
+    border-bottom: 1px solid #333;
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}

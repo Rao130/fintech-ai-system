@@ -406,13 +406,31 @@
             return insights;
         }
 
-    
+        async function loadRiskyUsers() {
+            const res = await fetch('/top_risky_users');
+            const data = await res.json();
+
+            let html = "";
+
+            data.users.forEach(user => {
+                html += `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.transactions}</td>
+                        <td>${user.risk}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('riskyUsers').innerHTML = html;
+        }
 
         // Initialize on page load
         window.onload = function() {
             loadHistory();
             loadAnalytics();
             loadTrendChart();
+            loadRiskyUsers();
             
             // Add event listeners for search and filter
             document.getElementById('searchUser').addEventListener('input', loadHistory);
