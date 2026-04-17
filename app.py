@@ -165,32 +165,6 @@ def analytics():
         "safe": safe,
         "fraud_percent": fraud_percent
     })
-@app.route('/top_risky_users')
-def top_risky_users():
-    import sqlite3
-
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
-
-    # assuming table columns: name, amount, location, status, risk_score
-    cursor.execute("""
-        SELECT name, COUNT(*) as total, AVG(risk_score) as avg_risk
-        FROM transactions
-        GROUP BY name
-        ORDER BY avg_risk DESC
-        LIMIT 5
-    """)
-
-    users = cursor.fetchall()
-    conn.close()
-
-    result = []
-    for u in users:
-        result.append({
-            "name": u[0],
-            "transactions": u[1],
-            "risk": round(u[2], 2)
-        })
 
 @app.route('/top_risky_users')
 def top_risky_users():
@@ -220,6 +194,7 @@ def top_risky_users():
         })
 
     return {"users": result}
+
 @app.route('/get_alert')
 def get_alert():
     global last_alert
