@@ -71,62 +71,50 @@ def calculate_behavior_risk(user_id, amount, time, location):
 @app.route('/')
 def home():
     return render_template('index.html')
+# last alert store karne ke liye (top me define karo)
+last_alert = None
 
 @app.route('/check_transaction', methods=['POST'])
 def check_transaction():
-    try:
-        data = request.json
+    global last_alert
+    data = request.json
 
-        user_id = data.get("user_id", "guest")
-        amount = float(data.get("amount", 0))
-        time = float(data.get("time", 0))
-        location = float(data.get("location", 0))
+    name = data['name']
+    amount = float(data['amount'])
+    location = data['location']
 
-        # ML Prediction
-        prediction = model.predict([[amount, time, location]])[0]
-        probability = model.predict_proba([[amount, time, location]])[0][1]
+    risk_score = 0
 
-        ml_risk = round(probability * 100, 2)
+    if amount > 10000:
+        risk_score += 50
+    if location.lower() != "india":
+        risk_score += 30
 
-        # Behavior risk
-        behavior_risk = calculate_behavior_risk(user_id, amount, time, location)
+    status = "Fraud" if risk_score > 50 else "Safe"
 
-        # Final risk
-        final_risk = min(ml_risk + behavior_risk, 100)
+    # ALERT STORE
+    if status == "Fraud":
+        last_alert = {
+            "name": name,
+            "amount": amount,
+            "location": location,
+            "risk": risk_score
+        }
 
-        result = "Fraud" if final_risk > 60 else "Safe"
+    # DB SAVE (assumed already)
+    import sqlite3
+    conn = sqlite3.connect("transactions.db")
+    cursor = conn.cursor()
 
-        # Alert system
-        alert = True if final_risk > 75 else False
+    cursor.execute("""
+        INSERT INTO transactions (name, amount, location, status, risk_score)
+        VALUES (?, ?, ?, ?, ?)
+    """, (name, amount, location, status, risk_score))
 
-        # Save DB
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
+    conn.commit()
+    conn.close()
 
-        c.execute('''
-            INSERT INTO transactions (user_id, amount, time, location, result, risk_score)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (user_id, amount, time, location, result, final_risk))
-
-        conn.commit()
-        conn.close()
-        risk_score = int(model.predict([[amount, time, location]])[0] * 100)
-        credit_score = max(300, 900 - risk_score)
-
-        result = "Fraud" if risk_score > 70 else "Safe"
-        return jsonify({
-            "result": result,
-            "risk_score": final_risk,
-            "behavior_risk": behavior_risk,
-            "alert": alert,
-            "credit_score": credit_score,
-            "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
-        })
-
-    except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({"error": str(e)}), 500
-
+    return {"status": status, "risk_score": risk_score}
 # -------------------------------
 # History API
 # -------------------------------
@@ -232,6 +220,51 @@ def top_risky_users():
         })
 
     return {"users": result}
+@app.route('/get_alert')
+def get_alert():
+    global last_alert
+
+    if last_alert:
+        alert = last_alert
+        last_alert = None  # reset after showing
+        return {"alert": alert}
+
+    return {"alert": None}
+@app.route('/filter_transactions')
+def filter_transactions():
+    import sqlite3
+    from flask import request
+
+    search = request.args.get('search', '')
+    status = request.args.get('status', '')
+
+    conn = sqlite3.connect("transactions.db")
+    cursor = conn.cursor()
+
+    query = "SELECT name, amount, status FROM transactions WHERE 1=1"
+    params = []
+
+    if search:
+        query += " AND name LIKE ?"
+        params.append(f"%{search}%")
+
+    if status:
+        query += " AND status=?"
+        params.append(status)
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
+    conn.close()
+
+    result = []
+    for r in rows:
+        result.append({
+            "name": r[0],
+            "amount": r[1],
+            "status": r[2]
+        })
+
+    return {"data": result}
 # -------------------------------
 # Run
 # -------------------------------

@@ -120,6 +120,28 @@
                 <h3>📊 Weekly Trend</h3>
                 <canvas id="trendChart"></canvas>
             </div>
+
+            <div class="card">
+                <h3>📂 Transaction Filters</h3>
+                <input type="text" id="searchInput" placeholder="Search user...">
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="Safe">Safe</option>
+                    <option value="Fraud">Fraud</option>
+                </select>
+                <button onclick="loadFiltered()">Apply</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filteredData"></tbody>
+                </table>
+            </div>
+
             <!-- TRANSACTION HISTORY SECTION -->
             <div class="card">
                 <h2>Transaction History</h2>
@@ -408,37 +430,34 @@
             return insights;
         }
 
-        async function loadRiskyUsers() {
-            const res = await fetch('/top_risky_users');
+        // Load Filtered Data
+        async function loadFiltered() {
+            const search = document.getElementById('searchInput').value;
+            const status = document.getElementById('filterStatus').value;
+
+            const res = await fetch(`/filter_transactions?search=${search}&status=${status}`);
             const data = await res.json();
 
-            let rows = "";
+            let html = "";
 
-            data.users.forEach(user => {
-                rows += `
+            data.data.forEach(tx => {
+                html += `
                     <tr>
-                        <td>${user.name}</td>
-                        <td>${user.transactions}</td>
-                        <td>${user.risk}</td>
+                        <td>${tx.name}</td>
+                        <td>₹${tx.amount}</td>
+                        <td>${tx.status}</td>
                     </tr>
                 `;
             });
 
-            document.getElementById('riskyUsers').innerHTML = rows;
+            document.getElementById('filteredData').innerHTML = html;
         }
-        function autoRefresh() {
-            loadAnalytics();
-            loadRiskyUsers();
-        }
-
-        setInterval(autoRefresh, 5000); // every 5 seconds
 
         // Initialize on page load
         window.onload = function() {
             loadHistory();
             loadAnalytics();
             loadTrendChart();
-            loadRiskyUsers();
             
             // Add event listeners for search and filter
             document.getElementById('searchUser').addEventListener('input', loadHistory);

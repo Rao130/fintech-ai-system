@@ -939,3 +939,44 @@ tr:hover {
         opacity: 0.5;
     }
 }
+.alert-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ff3b3b;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 0 15px rgba(255,0,0,0.5);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}
+input, select, button {
+    margin: 5px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+button {
+    background: #00c3ff;
+    color: #000;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #00a0d1;
+}
