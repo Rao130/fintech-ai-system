@@ -46,22 +46,30 @@ def calculate_behavior_risk(user_id, amount, time, location):
         user_profiles[user_id] = {
             "avg_amount": amount,
             "avg_time": time,
-            "avg_location": location
+            "avg_location": location,
+            "last_location": location
         }
         return 0
 
     risk = 0
 
+    # Check if amount exceeds 3x average user spending
+    if amount > (profile["avg_amount"] * 3):
+        risk += 40
+
     if abs(amount - profile["avg_amount"]) > 3000:
         risk += 20
     if abs(time - profile["avg_time"]) > 5:
         risk += 15
-    if abs(location - profile["avg_location"]) > 20:
-        risk += 15
+    
+    # Check if location differs from user's last location
+    if location != profile["last_location"]:
+        risk += 20
 
     profile["avg_amount"] = (profile["avg_amount"] + amount) / 2
     profile["avg_time"] = (profile["avg_time"] + time) / 2
     profile["avg_location"] = (profile["avg_location"] + location) / 2
+    profile["last_location"] = location
 
     return risk
 
@@ -115,12 +123,21 @@ def check_transaction():
 
         credit_score = max(300, 900 - int(final_risk))
 
+        # Determine action based on risk score
+        if final_risk < 40:
+            action = "Allow"
+        elif final_risk < 70:
+            action = "Review"
+        else:
+            action = "Block"
+
         return jsonify({
-            "result": result,
+            "status": result,
             "risk_score": final_risk,
             "behavior_risk": behavior_risk,
             "alert": alert,
             "credit_score": credit_score,
+            "action": action,
             "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
         })
 

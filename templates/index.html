@@ -227,12 +227,12 @@
             .then(data => {
                 if (data.alert) {
                     document.getElementById("alertBox").classList.add('show');
-                    showAlert('High risk transaction detected! Credit Score: ' + data.credit_score, 'error');
+                    showAlert('High risk transaction detected! Credit Score: ' + data.credit_score + ' | Action: ' + data.action, 'error');
                 } else {
                     document.getElementById("alertBox").classList.remove('show');
-                    showAlert('Transaction appears safe! Credit Score: ' + data.credit_score, 'success');
+                    showAlert('Transaction appears safe! Credit Score: ' + data.credit_score + ' | Action: ' + data.action, 'success');
                 }
-                document.getElementById('credit').innerText = '💳 Your Credit Score: ' + data.credit_score;
+                document.getElementById('credit').innerText = '💳 Your Credit Score: ' + data.credit_score + ' | 📋 Action: ' + data.action;
                 loadHistory();
                 loadAnalytics();
                 loadChart();
