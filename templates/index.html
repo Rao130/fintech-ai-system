@@ -314,6 +314,14 @@
                         }
                     }
                 });
+
+                // Generate and display AI insights
+                const insights = generateInsights(data);
+                let insightsHtml = "";
+                insights.forEach(insight => {
+                    insightsHtml += `<li style="padding: 8px 0; color: var(--text-secondary);">${insight}</li>`;
+                });
+                document.getElementById('insights').innerHTML = insightsHtml;
             })
             .catch(err => {
                 console.error("Error loading analytics:", err);
