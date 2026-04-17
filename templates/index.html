@@ -25,7 +25,7 @@
             <span></span>
         </div>
     </button>
-
+    <h3 id="credit"></h3>
     <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="container">
@@ -126,11 +126,12 @@
                                 <th>Status</th>
                                 <th>Risk Score</th>
                                 <th>Timestamp</th>
+                                <th>Credit Score</th>
                             </tr>
                         </thead>
                         <tbody id="historyBody">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: var(--text-tertiary);">No transactions yet</td>
+                                <td colspan="5" style="text-align: center; color: var(--text-tertiary);">No transactions yet</td>
                             </tr>
                         </tbody>
                     </table>
@@ -171,6 +172,7 @@
             const time = document.getElementById("time").value;
             const location = document.getElementById("location").value;
             const user_id = document.getElementById("user_id").value;
+            const credit_score = document.getElementById("credit_score").value;
 
             if (!amount || !time || !location || !user_id) {
                 showAlert('Please fill all fields', 'error');
@@ -237,6 +239,7 @@
                                 ${row.risk_score}
                                 <span class="tag ${riskLabel}">${riskLabel.toUpperCase()}</span>
                             </td>
+                            <td>${row.credit_score}</td>
                         </tr>
                     `;
                 });

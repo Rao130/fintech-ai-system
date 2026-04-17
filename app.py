@@ -110,12 +110,16 @@ def check_transaction():
 
         conn.commit()
         conn.close()
+        risk_score = int(model.predict([[amount, time, location]])[0] * 100)
+        credit_score = max(300, 900 - risk_score)
 
+        result = "Fraud" if risk_score > 70 else "Safe"
         return jsonify({
             "result": result,
             "risk_score": final_risk,
             "behavior_risk": behavior_risk,
             "alert": alert,
+            "credit_score": credit_score,
             "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
         })
 
@@ -141,7 +145,8 @@ def get_history():
             "user_id": r[0],
             "amount": r[1],
             "result": r[2],
-            "risk_score": r[3]
+            "risk_score": r[3],
+            "credit_score": max(300, 900 - int(r[3]))
         }
         for r in rows
     ])
