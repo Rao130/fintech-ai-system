@@ -180,32 +180,33 @@ def analytics():
 
 @app.route('/top_risky_users')
 def top_risky_users():
-    import sqlite3
+    try:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
 
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
+        cursor.execute("""
+            SELECT user_id, COUNT(*) as total, AVG(risk_score) as avg_risk
+            FROM transactions
+            GROUP BY user_id
+            ORDER BY avg_risk DESC
+            LIMIT 5
+        """)
 
-    # assuming table columns: name, amount, location, status, risk_score
-    cursor.execute("""
-        SELECT name, COUNT(*) as total, AVG(risk_score) as avg_risk
-        FROM transactions
-        GROUP BY name
-        ORDER BY avg_risk DESC
-        LIMIT 5
-    """)
+        users = cursor.fetchall()
+        conn.close()
 
-    users = cursor.fetchall()
-    conn.close()
+        result = []
+        for u in users:
+            result.append({
+                "name": u[0],
+                "transactions": u[1],
+                "risk": round(u[2], 2) if u[2] else 0
+            })
 
-    result = []
-    for u in users:
-        result.append({
-            "name": u[0],
-            "transactions": u[1],
-            "risk": round(u[2], 2)
-        })
-
-    return {"users": result}
+        return jsonify({"users": result})
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/get_alert')
 def get_alert():
@@ -214,91 +215,99 @@ def get_alert():
     if last_alert:
         alert = last_alert
         last_alert = None  # reset after showing
-        return {"alert": alert}
+        return jsonify({"alert": alert})
 
-    return {"alert": None}
+    return jsonify({"alert": None})
 @app.route('/filter_transactions')
 def filter_transactions():
-    import sqlite3
-    from flask import request
+    try:
+        search = request.args.get('search', '')
+        status = request.args.get('status', '')
 
-    search = request.args.get('search', '')
-    status = request.args.get('status', '')
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
 
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
+        query = "SELECT user_id, amount, result FROM transactions WHERE 1=1"
+        params = []
 
-    query = "SELECT name, amount, status FROM transactions WHERE 1=1"
-    params = []
+        if search:
+            query += " AND user_id LIKE ?"
+            params.append(f"%{search}%")
 
-    if search:
-        query += " AND name LIKE ?"
-        params.append(f"%{search}%")
+        if status:
+            query += " AND result=?"
+            params.append(status)
 
-    if status:
-        query += " AND status=?"
-        params.append(status)
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        conn.close()
 
-    cursor.execute(query, params)
-    rows = cursor.fetchall()
-    conn.close()
+        result = []
+        for r in rows:
+            result.append({
+                "name": r[0],
+                "amount": r[1],
+                "status": r[2]
+            })
 
-    result = []
-    for r in rows:
-        result.append({
-            "name": r[0],
-            "amount": r[1],
-            "status": r[2]
-        })
-
-    return {"data": result}
+        return jsonify({"data": result})
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/trend_data')
 def trend_data():
-    import sqlite3
+    try:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
 
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
+        # Group by date and count fraud transactions
+        cursor.execute("""
+            SELECT date(datetime('now', '-' || (SELECT MAX(id) - id FROM transactions) || ' days')), COUNT(*) 
+            FROM transactions 
+            WHERE result='Fraud'
+            GROUP BY date(datetime('now', '-' || (SELECT MAX(id) - id FROM transactions) || ' days'))
+            ORDER BY date DESC
+            LIMIT 7
+        """)
 
-    cursor.execute("""
-        SELECT DATE(rowid), COUNT(*) 
-        FROM transactions 
-        WHERE status='Fraud'
-        GROUP BY DATE(rowid)
-    """)
+        rows = cursor.fetchall()
+        conn.close()
 
-    rows = cursor.fetchall()
-    conn.close()
+        dates = []
+        counts = []
 
-    dates = []
-    counts = []
+        for r in rows:
+            dates.append(str(r[0]) if r[0] else "Today")
+            counts.append(r[1])
 
-    for r in rows:
-        dates.append(str(r[0]))
-        counts.append(r[1])
-
-    return {"dates": dates, "counts": counts}
+        return jsonify({"dates": dates, "counts": counts})
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"dates": [], "counts": [], "error": str(e)}), 200
 
 @app.route('/export')
 def export_data():
-    import sqlite3
-    import csv
-    from flask import Response
+    try:
+        from flask import Response
 
-    conn = sqlite3.connect("transactions.db")
-    cursor = conn.cursor()
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
 
-    cursor.execute("SELECT name, amount, location, status, risk_score FROM transactions")
-    rows = cursor.fetchall()
-    conn.close()
+        cursor.execute("SELECT user_id, amount, time, location, result, risk_score FROM transactions")
+        rows = cursor.fetchall()
+        conn.close()
 
-    def generate():
-        yield "Name,Amount,Location,Status,Risk\n"
-        for r in rows:
-            yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]}\n"
+        def generate():
+            yield "User ID,Amount,Time,Location,Status,Risk Score\n"
+            for r in rows:
+                yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]}\n"
 
-    return Response(generate(), mimetype="text/csv",
-                    headers={"Content-Disposition": "attachment;filename=transactions.csv"})
+        return Response(generate(), mimetype="text/csv",
+                        headers={"Content-Disposition": "attachment;filename=transactions.csv"})
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 # -------------------------------
 # Run

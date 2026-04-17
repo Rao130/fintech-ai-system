@@ -394,24 +394,38 @@
                     else safe++;
                 });
 
-                const ctx = document.getElementById('trendChart').getContext('2d');
+                const trendCanvas = document.getElementById('trendChart');
+                if (!trendCanvas) {
+                    console.log("Trend chart canvas not found");
+                    return;
+                }
+
+                const ctx = trendCanvas.getContext('2d');
 
                 if (window.trendChartInstance) {
                     window.trendChartInstance.destroy();
                 }
 
                 window.trendChartInstance = new Chart(ctx, {
-                    type: 'line',
+                    type: 'bar',
                     data: {
                         labels: ['Fraud', 'Safe'],
                         datasets: [{
-                            label: 'Trend',
+                            label: 'Transactions',
                             data: [fraud, safe],
-                            borderColor: '#3b82f6',
-                            fill: false
+                            backgroundColor: ['#ef4444', '#10b981']
                         }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true }
+                        }
                     }
                 });
+            })
+            .catch(err => {
+                console.error("Error loading trend chart:", err);
             });
         }
 
@@ -461,27 +475,50 @@
 
         // Load Trend Graph
         async function loadTrendGraph() {
-            const res = await fetch('/trend_data');
-            const data = await res.json();
+            try {
+                const res = await fetch('/trend_data');
+                const data = await res.json();
 
-            const ctx = document.getElementById('trendGraph').getContext('2d');
-
-            if (window.trendGraphInstance) {
-                window.trendGraphInstance.destroy();
-            }
-
-            window.trendGraphInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.dates,
-                    datasets: [{
-                        label: 'Fraud Trend',
-                        data: data.counts,
-                        borderColor: '#ff3b3b',
-                        fill: false
-                    }]
+                const ctx = document.getElementById('trendGraph');
+                
+                if (!ctx) {
+                    console.log("Trend graph canvas not found");
+                    return;
                 }
-            });
+
+                const ctxObj = ctx.getContext('2d');
+
+                if (window.trendGraphInstance) {
+                    window.trendGraphInstance.destroy();
+                }
+
+                // Ensure we have data
+                const labels = data.dates && data.dates.length > 0 ? data.dates : ['No Data'];
+                const counts = data.counts && data.counts.length > 0 ? data.counts : [0];
+
+                window.trendGraphInstance = new Chart(ctxObj, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Fraud Trend',
+                            data: counts,
+                            borderColor: '#ff3b3b',
+                            backgroundColor: 'rgba(255, 59, 59, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Error loading trend graph:", err);
+            }
         }
 
         // Export Data
