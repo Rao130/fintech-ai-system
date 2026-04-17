@@ -5,9 +5,7 @@ import sqlite3
 import time
 
 app = Flask(__name__)
-current_time = int(time.time()) % 86400  # seconds in day
 
-ml_prediction = model.predict([[amount, current_time, location_encoded]])[0]
 # -------------------------------
 # Load ML Model
 # -------------------------------
