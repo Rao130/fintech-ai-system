@@ -65,6 +65,7 @@
                 <div id="result" class="mt-2"></div>
             </div>
 
+
             <!-- STATS GRID -->
             <div class="grid">
                 <div class="stat-card">
@@ -99,7 +100,21 @@
                     </ul>
                 </div>
             </div>
+            
+            <div class="card">
+                <h3>🔍 Search & Filter</h3>
+                <input type="text" id="searchUser" placeholder="Search by User ID">
+                <select id="filterResult">
+                    <option value="">All</option>
+                    <option value="Fraud">Fraud</option>
+                    <option value="Safe">Safe</option>
+                </select>
+            </div>
 
+            <div class="card">
+                <h3>📊 Weekly Trend</h3>
+                <canvas id="trendChart"></canvas>
+            </div>
             <!-- TRANSACTION HISTORY SECTION -->
             <div class="card">
                 <h2>Transaction History</h2>
@@ -198,26 +213,36 @@
             fetch('/history')
             .then(res => res.json())
             .then(data => {
-                const tbody = document.getElementById("historyBody");
-                if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-tertiary);">No transactions yet</td></tr>';
-                    return;
-                }
-                
-                tbody.innerHTML = data.map(item => `
-                    <tr>
-                        <td><strong>₹${item.amount.toFixed(2)}</strong></td>
-                        <td>
-                            <span class="badge ${item.result === 'Fraud' ? 'badge-danger' : 'badge-success'}">
-                                ${item.result}
-                            </span>
-                        </td>
-                        <td>${item.risk_score}%</td>
-                        <td>${new Date().toLocaleString()}</td>
-                    </tr>
-                `).join('');
-            })
-            .catch(err => console.error(err));
+
+                const search = document.getElementById('searchUser').value.toLowerCase();
+                const filter = document.getElementById('filterResult').value;
+
+                let html = "";
+
+                data.forEach(row => {
+
+                    if (search && !row.user_id.toLowerCase().includes(search)) return;
+                    if (filter && row.result !== filter) return;
+
+                    let riskLabel = "low";
+                    if (row.risk_score > 70) riskLabel = "high";
+                    else if (row.risk_score > 40) riskLabel = "medium";
+
+                    html += `
+                        <tr>
+                            <td>${row.user_id}</td>
+                            <td>${row.amount}</td>
+                            <td>${row.result}</td>
+                            <td>
+                                ${row.risk_score}
+                                <span class="tag ${riskLabel}">${riskLabel.toUpperCase()}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('history').innerHTML = html;
+            });
         }
 
         // Load Analytics
@@ -312,11 +337,49 @@
             }, 4000);
         }
 
+        function loadTrendChart() {
+            fetch('/history')
+            .then(res => res.json())
+            .then(data => {
+
+                let fraud = 0;
+                let safe = 0;
+
+                data.forEach(row => {
+                    if (row.result === "Fraud") fraud++;
+                    else safe++;
+                });
+
+                const ctx = document.getElementById('trendChart').getContext('2d');
+
+                if (window.trendChartInstance) {
+                    window.trendChartInstance.destroy();
+                }
+
+                window.trendChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Fraud', 'Safe'],
+                        datasets: [{
+                            label: 'Trend',
+                            data: [fraud, safe],
+                            borderColor: '#3b82f6',
+                            fill: false
+                        }]
+                    }
+                });
+            });
+        }
+
         // Initialize on page load
         window.onload = function() {
             loadHistory();
             loadAnalytics();
-            loadChart();
+            loadTrendChart();
+            
+            // Add event listeners for search and filter
+            document.getElementById('searchUser').addEventListener('input', loadHistory);
+            document.getElementById('filterResult').addEventListener('change', loadHistory);
         };
     </script>
 
