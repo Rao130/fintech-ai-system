@@ -42,20 +42,16 @@
                 <h2>Check Transaction</h2>
                 <form id="transactionForm">
                     <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" placeholder="Enter user name" required>
+                    </div>
+                    <div class="form-group">
                         <label for="amount">Amount (₹)</label>
                         <input type="number" id="amount" placeholder="Enter transaction amount" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label for="time">Time</label>
-                        <input type="number" id="time" placeholder="Enter time" min="0" max="24" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="location">Location Code</label>
-                        <input type="number" id="location" placeholder="Enter location code" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="user_id">User ID</label>
-                        <input type="text" id="user_id" placeholder="Enter user ID" required>
+                        <label for="location">Location</label>
+                        <input type="text" id="location" placeholder="Enter location (e.g., New York, Delhi)" required>
                     </div>
                     <button type="button" onclick="checkFraud()">Check Transaction</button>
                 </form>
@@ -201,12 +197,11 @@
 
         // Check Fraud Function
         function checkFraud() {
+            const name = document.getElementById("name").value;
             const amount = document.getElementById("amount").value;
-            const time = document.getElementById("time").value;
             const location = document.getElementById("location").value;
-            const user_id = document.getElementById("user_id").value;
 
-            if (!amount || !time || !location || !user_id) {
+            if (!name || !amount || !location) {
                 showAlert('Please fill all fields', 'error');
                 return;
             }
@@ -217,22 +212,35 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    name: name,
                     amount: amount,
-                    time: time,
-                    location: location,
-                    user_id: user_id
+                    location: location
                 })
             })
             .then(res => res.json())
             .then(data => {
-                if (data.alert) {
+                if (data.status === "Fraud") {
                     document.getElementById("alertBox").classList.add('show');
-                    showAlert('High risk transaction detected! Credit Score: ' + data.credit_score + ' | Action: ' + data.action, 'error');
+                    showAlert('🚨 ' + data.status + ' | Risk: ' + data.risk_score + ' | Action: ' + data.action, 'error');
+                } else if (data.status === "Suspicious") {
+                    document.getElementById("alertBox").classList.remove('show');
+                    showAlert('⚠️ ' + data.status + ' | Risk: ' + data.risk_score + ' | Action: ' + data.action, 'warning');
                 } else {
                     document.getElementById("alertBox").classList.remove('show');
-                    showAlert('Transaction appears safe! Credit Score: ' + data.credit_score + ' | Action: ' + data.action, 'success');
+                    showAlert('✅ ' + data.status + ' | Risk: ' + data.risk_score + ' | Action: ' + data.action, 'success');
                 }
-                document.getElementById('credit').innerText = '💳 Your Credit Score: ' + data.credit_score + ' | 📋 Action: ' + data.action;
+                
+                // Display result with status, risk score, and action
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <div style="padding: 12px; background: #f5f5f5; border-radius: 8px; border-left: 4px solid ${data.status === 'Fraud' ? '#ff6b6b' : data.status === 'Suspicious' ? '#ffa500' : '#51cf66'};"><br>
+                    <strong>📊 Status:</strong> ${data.status} <br>
+                    <strong>⚡ Risk Score:</strong> ${data.risk_score} <br>
+                    <strong>📋 Action:</strong> ${data.action}
+                    </div>
+                `;
+                
+                document.getElementById('credit').innerText = '📊 Status: ' + data.status + ' | 📋 Action: ' + data.action + ' | Risk: ' + data.risk_score;
                 loadHistory();
                 loadAnalytics();
                 loadChart();

@@ -14,20 +14,30 @@ model = pickle.load(open(os.path.join('model', 'model.pkl'), 'rb'))
 # Database Setup
 # -------------------------------
 def init_db():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
+    conn = sqlite3.connect("transactions.db")
+    cursor = conn.cursor()
 
-    c.execute('''
+    # Transactions table
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
+            name TEXT,
             amount REAL,
-            time REAL,
-            location REAL,
-            result TEXT,
+            location TEXT,
+            status TEXT,
             risk_score REAL
         )
-    ''')
+    """)
+
+    # User profiles table for behavior tracking
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            name TEXT PRIMARY KEY,
+            avg_amount REAL,
+            last_location TEXT,
+            total_tx INTEGER
+        )
+    """)
 
     conn.commit()
     conn.close()
@@ -86,59 +96,73 @@ last_alert = None
 def check_transaction():
     try:
         data = request.json
+        name = data.get('name', 'guest')
+        amount = float(data.get('amount', 0))
+        location = data.get('location', 'unknown')
 
-        user_id = data.get("user_id", "guest")
-        amount = float(data.get("amount", 0))
-        time = float(data.get("time", 0))
-        location = float(data.get("location", 0))
+        conn = sqlite3.connect("transactions.db", check_same_thread=False)
+        cursor = conn.cursor()
 
-        # ML Prediction
-        prediction = model.predict([[amount, time, location]])[0]
-        probability = model.predict_proba([[amount, time, location]])[0][1]
+        # 👇 USER PROFILE FETCH
+        cursor.execute("SELECT avg_amount, last_location, total_tx FROM user_profiles WHERE name=?", (name,))
+        user = cursor.fetchone()
 
-        ml_risk = round(probability * 100, 2)
+        risk_score = 0
 
-        # Behavior risk
-        behavior_risk = calculate_behavior_risk(user_id, amount, time, location)
+        if user:
+            avg_amount, last_location, total_tx = user
 
-        # Final risk
-        final_risk = min(ml_risk + behavior_risk, 100)
+            # 💰 Amount behavior check
+            if amount > avg_amount * 3:
+                risk_score += 40
 
-        result = "Fraud" if final_risk > 60 else "Safe"
+            # 🌍 Location change check
+            if location != last_location:
+                risk_score += 30
 
-        # Alert system
-        alert = True if final_risk > 75 else False
+            # 📊 Sudden spike in activity
+            if total_tx > 5:
+                risk_score += 10
 
-        # Save DB
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
+            # UPDATE USER PROFILE
+            new_avg = (avg_amount * total_tx + amount) / (total_tx + 1)
+            cursor.execute("""
+                UPDATE user_profiles
+                SET avg_amount=?, last_location=?, total_tx=?
+                WHERE name=?
+            """, (new_avg, location, total_tx + 1, name))
 
-        c.execute('''
-            INSERT INTO transactions (user_id, amount, time, location, result, risk_score)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (user_id, amount, time, location, result, final_risk))
+        else:
+            # 👶 New user
+            cursor.execute("""
+                INSERT INTO user_profiles (name, avg_amount, last_location, total_tx)
+                VALUES (?, ?, ?, ?)
+            """, (name, amount, location, 1))
+
+        # 🎯 FINAL DECISION
+        if risk_score < 40:
+            status = "Safe"
+            action = "Allow"
+        elif risk_score < 70:
+            status = "Suspicious"
+            action = "Review"
+        else:
+            status = "Fraud"
+            action = "Block"
+
+        # 💾 SAVE TRANSACTION
+        cursor.execute("""
+            INSERT INTO transactions (name, amount, location, status, risk_score)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, amount, location, status, risk_score))
 
         conn.commit()
         conn.close()
 
-        credit_score = max(300, 900 - int(final_risk))
-
-        # Determine action based on risk score
-        if final_risk < 40:
-            action = "Allow"
-        elif final_risk < 70:
-            action = "Review"
-        else:
-            action = "Block"
-
         return jsonify({
-            "status": result,
-            "risk_score": final_risk,
-            "behavior_risk": behavior_risk,
-            "alert": alert,
-            "credit_score": credit_score,
-            "action": action,
-            "ai_explanation": f"{result} detected based on ML probability {ml_risk}% and behavior analysis."
+            "status": status,
+            "risk_score": risk_score,
+            "action": action
         })
 
     except Exception as e:
@@ -149,51 +173,59 @@ def check_transaction():
 # -------------------------------
 @app.route('/history', methods=['GET'])
 def get_history():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
+    try:
+        conn = sqlite3.connect('transactions.db')
+        c = conn.cursor()
 
-    c.execute("SELECT user_id, amount, result, risk_score FROM transactions")
-    rows = c.fetchall()
+        c.execute("SELECT name, amount, status, risk_score FROM transactions")
+        rows = c.fetchall()
 
-    conn.close()
+        conn.close()
 
-    return jsonify([
-        {
-            "user_id": r[0],
-            "amount": r[1],
-            "result": r[2],
-            "risk_score": r[3],
-            "credit_score": max(300, 900 - int(r[3]))
-        }
-        for r in rows
-    ])
+        return jsonify([
+            {
+                "user_id": r[0],
+                "amount": r[1],
+                "result": r[2],
+                "risk_score": r[3],
+                "credit_score": max(300, 900 - int(r[3]))
+            }
+            for r in rows
+        ])
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 # -------------------------------
 # Analytics API
 # -------------------------------
 @app.route('/analytics', methods=['GET'])
 def analytics():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
+    try:
+        conn = sqlite3.connect('transactions.db')
+        c = conn.cursor()
 
-    c.execute("SELECT COUNT(*) FROM transactions")
-    total = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM transactions")
+        total = c.fetchone()[0]
 
-    c.execute("SELECT COUNT(*) FROM transactions WHERE result='Fraud'")
-    fraud = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM transactions WHERE status='Fraud'")
+        fraud = c.fetchone()[0]
 
-    safe = total - fraud
+        safe = total - fraud
 
-    fraud_percent = round((fraud / total) * 100, 2) if total > 0 else 0
+        fraud_percent = round((fraud / total) * 100, 2) if total > 0 else 0
 
-    conn.close()
+        conn.close()
 
-    return jsonify({
-        "total": total,
-        "fraud": fraud,
-        "safe": safe,
-        "fraud_percent": fraud_percent
-    })
+        return jsonify({
+            "total": total,
+            "fraud": fraud,
+            "safe": safe,
+            "fraud_percent": fraud_percent
+        })
+    except Exception as e:
+        print("ERROR:", str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/top_risky_users')
 def top_risky_users():
