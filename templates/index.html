@@ -398,7 +398,7 @@
                 let safe = 0;
 
                 data.forEach(row => {
-                    if (row.result === "Fraud") fraud++;
+                    if (row.status === "Fraud") fraud++;
                     else safe++;
                 });
 

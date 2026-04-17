@@ -230,13 +230,13 @@ def analytics():
 @app.route('/top_risky_users')
 def top_risky_users():
     try:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('transactions.db')
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT user_id, COUNT(*) as total, AVG(risk_score) as avg_risk
+            SELECT name, COUNT(*) as total, AVG(risk_score) as avg_risk
             FROM transactions
-            GROUP BY user_id
+            GROUP BY name
             ORDER BY avg_risk DESC
             LIMIT 5
         """)
@@ -273,18 +273,18 @@ def filter_transactions():
         search = request.args.get('search', '')
         status = request.args.get('status', '')
 
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('transactions.db')
         cursor = conn.cursor()
 
-        query = "SELECT user_id, amount, result FROM transactions WHERE 1=1"
+        query = "SELECT name, amount, status FROM transactions WHERE 1=1"
         params = []
 
         if search:
-            query += " AND user_id LIKE ?"
+            query += " AND name LIKE ?"
             params.append(f"%{search}%")
 
         if status:
-            query += " AND result=?"
+            query += " AND status=?"
             params.append(status)
 
         cursor.execute(query, params)
@@ -307,28 +307,21 @@ def filter_transactions():
 @app.route('/trend_data')
 def trend_data():
     try:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('transactions.db')
         cursor = conn.cursor()
 
-        # Group by date and count fraud transactions
+        # Get fraud transactions count
         cursor.execute("""
-            SELECT date(datetime('now', '-' || (SELECT MAX(id) - id FROM transactions) || ' days')), COUNT(*) 
+            SELECT COUNT(*) 
             FROM transactions 
-            WHERE result='Fraud'
-            GROUP BY date(datetime('now', '-' || (SELECT MAX(id) - id FROM transactions) || ' days'))
-            ORDER BY date DESC
-            LIMIT 7
+            WHERE status='Fraud'
         """)
 
         rows = cursor.fetchall()
         conn.close()
 
-        dates = []
-        counts = []
-
-        for r in rows:
-            dates.append(str(r[0]) if r[0] else "Today")
-            counts.append(r[1])
+        dates = ["Fraud Trend"]
+        counts = [rows[0][0] if rows and rows[0][0] else 0]
 
         return jsonify({"dates": dates, "counts": counts})
     except Exception as e:
@@ -340,17 +333,17 @@ def export_data():
     try:
         from flask import Response
 
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('transactions.db')
         cursor = conn.cursor()
 
-        cursor.execute("SELECT user_id, amount, time, location, result, risk_score FROM transactions")
+        cursor.execute("SELECT name, amount, location, status, risk_score FROM transactions")
         rows = cursor.fetchall()
         conn.close()
 
         def generate():
-            yield "User ID,Amount,Time,Location,Status,Risk Score\n"
+            yield "Name,Amount,Location,Status,Risk Score\n"
             for r in rows:
-                yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]},{r[5]}\n"
+                yield f"{r[0]},{r[1]},{r[2]},{r[3]},{r[4]}\n"
 
         return Response(generate(), mimetype="text/csv",
                         headers={"Content-Disposition": "attachment;filename=transactions.csv"})
