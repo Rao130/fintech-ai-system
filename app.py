@@ -2,14 +2,17 @@ from flask import Flask, render_template, request, jsonify
 import pickle
 import os
 import sqlite3
+import time
 
 app = Flask(__name__)
+current_time = int(time.time()) % 86400  # seconds in day
 
+ml_prediction = model.predict([[amount, current_time, location_encoded]])[0]
 # -------------------------------
 # Load ML Model
 # -------------------------------
 model = pickle.load(open(os.path.join('model', 'model.pkl'), 'rb'))
-
+encoder = pickle.load(open(os.path.join('model', 'encoder.pkl'), 'rb'))
 # -------------------------------
 # Database Setup
 # -------------------------------
@@ -99,6 +102,12 @@ def check_transaction():
         name = data.get('name', 'guest')
         amount = float(data.get('amount', 0))
         location = data.get('location', 'unknown')
+
+        # 🌍 Encode location for ML model
+        try:
+            location_encoded = encoder.transform([location])[0]
+        except:
+            location_encoded = 0  # fallback for new location
 
         conn = sqlite3.connect("transactions.db", check_same_thread=False)
         cursor = conn.cursor()
