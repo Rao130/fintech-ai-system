@@ -319,14 +319,6 @@
                 console.error("Error loading analytics:", err);
             });
         }
-        const insights = generateInsights(data);
-
-        let html = "";
-        insights.forEach(i => {
-            html += `<li>${i}</li>`;
-        });
-
-        document.getElementById('insights').innerHTML = html;
 
         // Load Chart
         let chart;
