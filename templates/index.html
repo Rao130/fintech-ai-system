@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div class="live-indicator">🟢 Live</div>
+
     <!-- SIDEBAR -->
     <div class="sidebar">
         <h2>🔐 Fintech AI</h2>
@@ -410,10 +412,10 @@
             const res = await fetch('/top_risky_users');
             const data = await res.json();
 
-            let html = "";
+            let rows = "";
 
             data.users.forEach(user => {
-                html += `
+                rows += `
                     <tr>
                         <td>${user.name}</td>
                         <td>${user.transactions}</td>
@@ -422,8 +424,14 @@
                 `;
             });
 
-            document.getElementById('riskyUsers').innerHTML = html;
+            document.getElementById('riskyUsers').innerHTML = rows;
         }
+        function autoRefresh() {
+            loadAnalytics();
+            loadRiskyUsers();
+        }
+
+        setInterval(autoRefresh, 5000); // every 5 seconds
 
         // Initialize on page load
         window.onload = function() {
